@@ -11,11 +11,11 @@ import ScrollToTop from "@/components/ScrollToTop";
 export const metadata: Metadata = {
   title: "Noori Fashion | Premium Women's Fashion in Bangladesh",
   description:
-    "Noori Fashion — Bangladesh's premium women's fashion brand. Shop exclusive boutique dresses, stitch & unstitch collections, plazo sets, and co-ord sets.",
+    "Noori Fashion — Premium Women's Fashion. Indian & Pakistani Boutique Collection. Exclusive, Stitch, Unstitch, Plazo Set & Co-ord Set. Visit us at Police Plaza Concord, Gulshan-1, Dhaka.",
   icons: { icon: "/favicon.ico" },
   openGraph: {
     title: "Noori Fashion | Premium Women's Fashion",
-    description: "Discover our exclusive collection of premium women's fashion.",
+    description: "Premium Indian & Pakistani Boutique Collection. Exclusive, Stitch, Unstitch, Plazo Set & Co-ord Set. Visit our store at Police Plaza Concord, Gulshan-1, Dhaka.",
     url: "https://noori.diptait.com.bd",
     siteName: "Noori Fashion",
     type: "website",
