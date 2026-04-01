@@ -87,11 +87,11 @@ export default function Header() {
         }`}
       >
         <div className="max-w-7xl mx-auto px-4">
-          <div className="flex items-center justify-between h-16 md:h-20 gap-4 relative">
+          <div className="flex items-center h-16 md:h-20">
             {/* Mobile Menu Button */}
             <button
               onClick={toggleMenu}
-              className="md:hidden p-2 -ml-2 z-10"
+              className="md:hidden p-2 -ml-2"
               aria-label="Menu"
             >
               <svg
@@ -118,19 +118,21 @@ export default function Header() {
               </svg>
             </button>
 
-            {/* Logo — centered on mobile */}
-            <Link href="/" className="md:static absolute left-1/2 -translate-x-1/2 md:translate-x-0 shrink-0">
-              <div className="bg-dark-600 rounded-lg px-2 py-1 flex items-center">
-                <Image
-                  src="/logo.jpg"
-                  alt="Noori Fashion"
-                  width={120}
-                  height={40}
-                  className="h-9 md:h-10 w-auto object-contain"
-                  priority
-                />
-              </div>
-            </Link>
+            {/* Logo — centered on mobile via flex-1 spacers */}
+            <div className="flex-1 flex justify-center md:justify-start md:flex-none">
+              <Link href="/" className="shrink-0">
+                <div className="bg-dark-600 rounded-lg px-2 py-1 flex items-center">
+                  <Image
+                    src="/logo.jpg"
+                    alt="Noori Fashion"
+                    width={120}
+                    height={40}
+                    className="h-9 md:h-10 w-auto object-contain"
+                    priority
+                  />
+                </div>
+              </Link>
+            </div>
 
             {/* Desktop Search Bar */}
             <form
@@ -167,7 +169,7 @@ export default function Header() {
             </form>
 
             {/* Actions */}
-            <div className="flex items-center gap-1 md:gap-3 z-10">
+            <div className="flex items-center gap-1 md:gap-3">
               {/* Mobile Search */}
               <button
                 onClick={toggleSearch}
