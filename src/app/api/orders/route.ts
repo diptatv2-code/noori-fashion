@@ -134,7 +134,7 @@ async function sendEmails(order: any, items: any[]) {
       headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
       body: JSON.stringify({
         from: "Noori Fashion <noreply@diptait.com.bd>",
-        to: ["Noori330332@gmail.com"],
+        to: ["business@diptait.com.bd"],
         subject: `New Order - ${order.order_number} | ${order.total}`,
         html,
       }),
