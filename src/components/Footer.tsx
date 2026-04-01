@@ -4,37 +4,7 @@ import Image from "next/image";
 
 export default function Footer() {
   return (
-    <footer className="bg-[#1A1A1A] text-white mt-16">
-      {/* Newsletter */}
-      <div className="border-b border-white/10">
-        <div className="max-w-7xl mx-auto px-4 py-12">
-          <div className="max-w-2xl mx-auto text-center">
-            <h3 className="font-display text-2xl font-semibold mb-2">
-              Stay in Style
-            </h3>
-            <p className="text-dark-300 text-sm mb-6">
-              Subscribe to get updates on new arrivals and exclusive offers.
-            </p>
-            <form
-              onSubmit={(e) => e.preventDefault()}
-              className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto"
-            >
-              <input
-                type="email"
-                placeholder="Enter your email address"
-                className="flex-1 bg-white/10 border border-white/20 px-4 py-3 text-sm text-white placeholder-dark-300 focus:border-brand focus:ring-1 focus:ring-brand outline-none transition-colors"
-              />
-              <button
-                type="submit"
-                className="bg-brand text-white px-6 py-3 text-sm font-medium hover:bg-brand-dark transition-colors shrink-0"
-              >
-                Subscribe
-              </button>
-            </form>
-          </div>
-        </div>
-      </div>
-
+    <footer className="bg-[#1A1A1A] text-white mt-8 md:mt-16">
       <div className="max-w-7xl mx-auto px-4 py-12">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Brand */}

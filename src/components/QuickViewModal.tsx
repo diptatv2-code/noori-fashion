@@ -42,7 +42,7 @@ export default function QuickViewModal() {
         </button>
         <div className="grid md:grid-cols-2">
           <div className="aspect-[3/4] relative bg-dark-50">
-            <Image src={getImg()} alt={product.name} fill className="object-cover" sizes="400px" />
+            <Image src={getImg()} alt={product.name} fill className="object-cover" sizes="400px" priority />
             {discount > 0 && <span className="badge-sale">-{discount}%</span>}
           </div>
           <div className="p-6">

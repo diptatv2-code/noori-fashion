@@ -66,7 +66,7 @@ export default function HomeClient({ categories, featured, newArrivals, banners,
       <QuickViewModal />
 
       {/* Hero Slider */}
-      <section className="relative h-[65vh] md:h-[80vh] overflow-hidden bg-dark-800">
+      <section className="relative h-[55vh] md:h-[80vh] overflow-hidden bg-dark-800">
         {heroSlides.map((slide, idx) => (
           <div
             key={idx}
@@ -167,9 +167,9 @@ export default function HomeClient({ categories, featured, newArrivals, banners,
       </section>
 
       {/* Category Grid */}
-      <section className="max-w-7xl mx-auto px-4 py-14 md:py-20">
-        <h2 className="section-title">Shop by Category</h2>
-        <p className="text-center text-dark-400 text-sm mb-10">Find your perfect style from our curated collections</p>
+      <section className="max-w-7xl mx-auto px-4 py-6 md:py-14">
+        <h2 className="text-xl md:text-2xl lg:text-3xl font-display font-semibold text-center mb-2">Shop by Category</h2>
+        <p className="text-center text-dark-400 text-sm mb-6 md:mb-10">Find your perfect style from our curated collections</p>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 md:gap-4">
           {categories.map((cat, idx) => (
             <Link
@@ -191,7 +191,7 @@ export default function HomeClient({ categories, featured, newArrivals, banners,
                   {cat.name}
                 </h3>
                 <p className="text-white/70 text-xs mt-1 group-hover:text-brand transition-colors">
-                  {categoryCounts[cat.id] || 0} Products
+                  {(categoryCounts[cat.id] || 0) === 1 ? "1 Product" : `${categoryCounts[cat.id] || 0} Products`}
                 </p>
               </div>
             </Link>
@@ -204,7 +204,7 @@ export default function HomeClient({ categories, featured, newArrivals, banners,
         <section className="max-w-7xl mx-auto px-4 py-8 md:py-12">
           <div className="flex items-center justify-between mb-8">
             <div>
-              <h2 className="font-display text-2xl md:text-3xl font-semibold">Featured Collection</h2>
+              <h2 className="font-display text-xl md:text-2xl lg:text-3xl font-semibold">Featured Collection</h2>
               <p className="text-dark-400 text-sm mt-1">Handpicked favorites just for you</p>
             </div>
             <Link href="/category/exclusive" className="text-sm text-brand font-medium hover:underline hidden md:block">
@@ -220,7 +220,7 @@ export default function HomeClient({ categories, featured, newArrivals, banners,
       )}
 
       {/* Mid-page Banner */}
-      <section className="relative h-[50vh] md:h-[60vh] overflow-hidden my-8">
+      <section className="relative h-[50vh] md:h-[60vh] overflow-hidden my-4 md:my-8">
         <Image src="/banner-2.jpg" alt="Noori Fashion Collection" fill className="object-cover object-top" sizes="100vw" />
         <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-transparent" />
         <div className="absolute inset-0 flex items-center">
@@ -267,33 +267,13 @@ export default function HomeClient({ categories, featured, newArrivals, banners,
         </div>
       </section>
 
-      {/* New Arrivals */}
-      {newArrivals.length > 0 && (
-        <section className="max-w-7xl mx-auto px-4 py-12 md:py-16">
-          <div className="flex items-center justify-between mb-8">
-            <div>
-              <h2 className="font-display text-2xl md:text-3xl font-semibold">New Arrivals</h2>
-              <p className="text-dark-400 text-sm mt-1">The latest additions to our collection</p>
-            </div>
-            <Link href="/category/stitch" className="text-sm text-brand font-medium hover:underline hidden md:block">
-              View All
-            </Link>
-          </div>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-            {newArrivals.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </div>
-        </section>
-      )}
-
 
       {/* Visit Our Store */}
-      <section className="bg-dark-50 py-16 md:py-20">
+      <section className="bg-dark-50 py-8 md:py-16">
         <div className="max-w-7xl mx-auto px-4">
           <div className="max-w-3xl mx-auto text-center">
-            <h2 className="font-display text-2xl md:text-3xl font-semibold mb-2">Visit Our Store</h2>
-            <p className="text-dark-400 text-sm mb-10">Experience our premium collection in person</p>
+            <h2 className="font-display text-xl md:text-2xl lg:text-3xl font-semibold mb-2">Visit Our Store</h2>
+            <p className="text-dark-400 text-sm mb-6 md:mb-10">Experience our premium collection in person</p>
           </div>
           <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
             <div className="bg-white p-6 text-center">
@@ -327,13 +307,13 @@ export default function HomeClient({ categories, featured, newArrivals, banners,
         </div>
       </section>
       {/* Why Choose Us */}
-      <section className="relative py-16 md:py-20 overflow-hidden">
+      <section className="relative py-8 md:py-14 overflow-hidden">
         <div className="absolute inset-0">
           <Image src="/banner-3.jpg" alt="" fill className="object-cover object-top" sizes="100vw" />
           <div className="absolute inset-0 bg-black/75 backdrop-blur-[2px]" />
         </div>
         <div className="relative max-w-4xl mx-auto px-4 text-center z-10">
-          <h2 className="font-display text-2xl md:text-3xl font-semibold text-white mb-4">
+          <h2 className="font-display text-xl md:text-2xl lg:text-3xl font-semibold text-white mb-4">
             Why Choose Noori Fashion?
           </h2>
           <p className="text-white/80 text-sm md:text-base leading-relaxed mb-8">
