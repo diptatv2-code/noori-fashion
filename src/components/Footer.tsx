@@ -166,7 +166,6 @@ export default function Footer() {
               </p>
               <div className="flex gap-2 text-xs">
                 <span className="bg-white/10 px-3 py-1.5 rounded">bKash</span>
-                <span className="bg-white/10 px-3 py-1.5 rounded">Nagad</span>
                 <span className="bg-white/10 px-3 py-1.5 rounded">COD</span>
               </div>
             </div>

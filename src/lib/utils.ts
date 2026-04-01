@@ -60,7 +60,6 @@ export function getStatusLabel(status: string): string {
     refunded: "Refunded",
     cod: "Cash on Delivery",
     bkash: "bKash",
-    nagad: "Nagad",
   };
   return labels[status] || status;
 }

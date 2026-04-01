@@ -170,7 +170,7 @@ export default function HomeClient({ categories, featured, newArrivals, banners,
               <h2 className="font-display text-2xl md:text-4xl font-bold text-white leading-tight mb-2 md:mb-3">
                 Free Delivery on <span className="text-brand">&#2547;5,000+</span> Orders
               </h2>
-              <p className="text-white/70 text-xs md:text-base mb-4 md:mb-6">Nationwide delivery. Cash on Delivery, bKash, or Nagad.</p>
+              <p className="text-white/70 text-xs md:text-base mb-4 md:mb-6">Nationwide delivery. Cash on Delivery or bKash.</p>
               <Link href="/category/exclusive" className="btn-primary text-xs md:text-sm py-2.5 px-5">Start Shopping</Link>
               <div className="flex gap-5 mt-5 md:mt-8">
                 <div className="text-center">

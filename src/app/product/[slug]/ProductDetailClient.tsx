@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useCartStore } from "@/lib/store";
@@ -7,11 +7,14 @@ import { formatPrice, getDiscount, getImageUrl } from "@/lib/utils";
 import ProductCard from "@/components/ProductCard";
 import type { Product } from "@/types";
 
+const MAKING_CHARGE = 500;
+
 export default function ProductDetailClient({ product, related }: { product: Product; related: Product[] }) {
   const images = product.nf_product_images || [];
   const variants = product.nf_product_variants || [];
   const sizes = [...new Set(variants.filter((v) => v.size).map((v) => v.size!))];
   const discount = getDiscount(product.price, product.compare_price);
+  const isUnstitch = product.nf_categories?.slug === "unstitch";
 
   const [selectedImage, setSelectedImage] = useState(0);
   const [selectedSize, setSelectedSize] = useState("");
@@ -20,10 +23,16 @@ export default function ProductDetailClient({ product, related }: { product: Pro
   const addItem = useCartStore((s) => s.addItem);
   const setCartOpen = useCartStore((s) => s.setCartOpen);
 
+  const isCustomSize = isUnstitch && selectedSize && selectedSize !== "Free Size";
+  const displayPrice = useMemo(() => {
+    if (isCustomSize) return product.price + MAKING_CHARGE;
+    return product.price;
+  }, [isCustomSize, product.price]);
+
   const handleAdd = () => {
     if (sizes.length > 0 && !selectedSize) return;
     const variant = variants.find((v) => v.size === selectedSize);
-    addItem(product, qty, selectedSize, undefined, variant);
+    addItem({ ...product, price: displayPrice }, qty, selectedSize, undefined, variant);
     setAdded(true);
     setTimeout(() => setAdded(false), 2000);
   };
@@ -37,7 +46,6 @@ export default function ProductDetailClient({ product, related }: { product: Pro
 
   return (
     <>
-      {/* Breadcrumb */}
       <div className="bg-dark-50 py-3">
         <div className="max-w-7xl mx-auto px-4 flex items-center gap-2 text-sm text-dark-400">
           <Link href="/" className="hover:text-brand">Home</Link>
@@ -54,7 +62,6 @@ export default function ProductDetailClient({ product, related }: { product: Pro
 
       <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="grid md:grid-cols-2 gap-8 lg:gap-12">
-          {/* Gallery */}
           <div>
             <div className="aspect-[3/4] relative bg-dark-50 overflow-hidden mb-3">
               <Image src={mainImg} alt={product.name} fill className="object-cover" sizes="(max-width: 768px) 100vw, 50vw" priority />
@@ -73,14 +80,15 @@ export default function ProductDetailClient({ product, related }: { product: Pro
             )}
           </div>
 
-          {/* Details */}
           <div>
             {product.nf_categories && (
               <p className="text-xs uppercase tracking-wider text-dark-400 mb-2">{product.nf_categories.name}</p>
             )}
             <h1 className="font-display text-2xl md:text-3xl font-semibold mb-3">{product.name}</h1>
-            <div className="flex items-center gap-3 mb-4">
-              <span className="text-2xl font-bold text-brand">{formatPrice(product.price)}</span>
+
+            {/* Price display */}
+            <div className="flex items-center gap-3 mb-4 flex-wrap">
+              <span className="text-2xl font-bold text-brand">{formatPrice(displayPrice)}</span>
               {product.compare_price && product.compare_price > product.price && (
                 <>
                   <span className="text-base text-dark-300 line-through">{formatPrice(product.compare_price)}</span>
@@ -88,6 +96,19 @@ export default function ProductDetailClient({ product, related }: { product: Pro
                 </>
               )}
             </div>
+
+            {/* Making charge notice for unstitch */}
+            {isCustomSize && (
+              <div className="mb-4 p-3 bg-brand-50 border border-brand/20 text-sm">
+                <p className="text-dark-600">
+                  {formatPrice(product.price)} + {formatPrice(MAKING_CHARGE)} making charge = <strong className="text-brand">{formatPrice(displayPrice)}</strong>
+                </p>
+              </div>
+            )}
+            {isUnstitch && !isCustomSize && (
+              <p className="text-xs text-dark-400 mb-4">Making charge {formatPrice(MAKING_CHARGE)} applies for custom sizes (38-46)</p>
+            )}
+
             {product.description && (
               <p className="text-sm text-dark-500 leading-relaxed mb-5 pb-5 border-b border-dark-100">{product.description}</p>
             )}
@@ -134,9 +155,7 @@ export default function ProductDetailClient({ product, related }: { product: Pro
               <button onClick={handleAdd} className={`btn-outline text-sm py-3 ${added ? "bg-green-600 text-white border-green-600" : ""}`}>
                 {added ? "Added!" : "Add to Bag"}
               </button>
-              <button onClick={handleBuyNow} className="btn-primary text-sm py-3">
-                Buy Now
-              </button>
+              <button onClick={handleBuyNow} className="btn-primary text-sm py-3">Buy Now</button>
             </div>
 
             <div className="space-y-3 text-sm border-t border-dark-100 pt-5">
@@ -146,7 +165,7 @@ export default function ProductDetailClient({ product, related }: { product: Pro
               </div>
               <div className="flex items-center gap-2 text-dark-500">
                 <svg className="w-4 h-4 text-brand shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg>
-                Cash on Delivery | bKash | Nagad
+                Cash on Delivery | bKash
               </div>
               <div className="flex items-center gap-2 text-dark-500">
                 <svg className="w-4 h-4 text-brand shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
@@ -156,14 +175,11 @@ export default function ProductDetailClient({ product, related }: { product: Pro
           </div>
         </div>
 
-        {/* You May Also Like */}
         {related.length > 0 && (
           <section className="mt-16">
             <h2 className="font-display text-2xl font-semibold mb-6">You May Also Like</h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-              {related.map((p) => (
-                <ProductCard key={p.id} product={p} />
-              ))}
+              {related.map((p) => (<ProductCard key={p.id} product={p} />))}
             </div>
           </section>
         )}
