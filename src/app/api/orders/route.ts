@@ -53,7 +53,7 @@ export async function POST(req: NextRequest) {
     await supabase.from("nf_order_items").insert(orderItems);
 
     sendTelegram(order, items).catch(console.error);
-    sendEmail(order, items).catch(console.error);
+    sendEmails(order, items).catch(console.error);
 
     return NextResponse.json({ order_number: order.order_number, order_id: order.id });
   } catch (err: any) {
@@ -95,9 +95,9 @@ async function sendTelegram(order: any, items: any[]) {
   });
 }
 
-async function sendEmail(order: any, items: any[]) {
+async function sendEmails(order: any, items: any[]) {
   const apiKey = process.env.RESEND_API_KEY;
-  if (!apiKey || !order.customer_email) return;
+  if (!apiKey) return;
 
   const rows = items.map((i: any) => {
     const sz = i.variant_size ? ` (${i.variant_size})` : "";
@@ -112,6 +112,9 @@ async function sendEmail(order: any, items: any[]) {
     '<h2 style="color:#333;margin:0 0 16px">Order Confirmation</h2>',
     `<p>Dear ${order.customer_name},</p>`,
     `<p>Your order has been placed successfully. Order number: <strong>${order.order_number}</strong></p>`,
+    `<p>Phone: ${order.customer_phone}</p>`,
+    `<p>Address: ${order.shipping_address}, ${order.shipping_city}</p>`,
+    `<p>Payment: ${order.payment_method}${order.transaction_id ? ` (TxnID: ${order.transaction_id})` : ""}</p>`,
     '<table style="width:100%;border-collapse:collapse;margin:16px 0">',
     '<thead><tr style="background:#f5f5f5"><th style="padding:8px;text-align:left">Product</th><th style="padding:8px;text-align:center">Qty</th><th style="padding:8px;text-align:right">Price</th></tr></thead>',
     `<tbody>${rows}</tbody>`,
@@ -124,27 +127,37 @@ async function sendEmail(order: any, items: any[]) {
     '</div></div>',
   ].join("");
 
-  const emailPayload = {
-    from: "Noori Fashion <noreply@diptait.com.bd>",
-    to: [order.customer_email],
-    subject: `Order Confirmation - ${order.order_number} | Noori Fashion`,
-    html,
-  };
+  // ALWAYS send to shop owner — regardless of customer email
+  try {
+    await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        from: "Noori Fashion <noreply@diptait.com.bd>",
+        to: ["Noori330332@gmail.com"],
+        subject: `New Order - ${order.order_number} | ${order.total}`,
+        html,
+      }),
+    });
+  } catch (e) {
+    console.error("Shop owner email failed:", e);
+  }
 
-  await fetch("https://api.resend.com/emails", {
-    method: "POST",
-    headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
-    body: JSON.stringify(emailPayload),
-  });
-
-  await fetch("https://api.resend.com/emails", {
-    method: "POST",
-    headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
-    body: JSON.stringify({
-      from: "Noori Fashion <noreply@diptait.com.bd>",
-      to: ["Noori330332@gmail.com"],
-      subject: `New Order - ${order.order_number} | ${order.total}`,
-      html,
-    }),
-  });
+  // Send to customer ONLY if they provided email
+  if (order.customer_email) {
+    try {
+      await fetch("https://api.resend.com/emails", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          from: "Noori Fashion <noreply@diptait.com.bd>",
+          to: [order.customer_email],
+          subject: `Order Confirmation - ${order.order_number} | Noori Fashion`,
+          html,
+        }),
+      });
+    } catch (e) {
+      console.error("Customer email failed:", e);
+    }
+  }
 }
