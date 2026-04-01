@@ -51,16 +51,6 @@ export default function HomeClient({ categories, featured, newArrivals, banners,
     return () => clearInterval(timer);
   }, [nextSlide]);
 
-  const getCategoryImage = (cat: Category, idx: number): string => {
-    if (cat.image) {
-      return cat.image.startsWith("http")
-        ? cat.image
-        : getImageUrl(cat.image);
-    }
-    const fallbacks = ["/banner-1.jpg", "/banner-2.jpg", "/banner-3.jpg"];
-    return fallbacks[idx % fallbacks.length];
-  };
-
   return (
     <>
       <QuickViewModal />
@@ -170,32 +160,23 @@ export default function HomeClient({ categories, featured, newArrivals, banners,
       <section className="max-w-7xl mx-auto px-4 py-6 md:py-14">
         <h2 className="text-xl md:text-2xl lg:text-3xl font-display font-semibold text-center mb-2">Shop by Category</h2>
         <p className="text-center text-dark-400 text-sm mb-6 md:mb-10">Find your perfect style from our curated collections</p>
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 md:gap-4">
-          {categories.map((cat, idx) => (
-            <Link
-              key={cat.id}
-              href={`/category/${cat.slug}`}
-              className="group relative bg-dark-50 aspect-[4/5] overflow-hidden animate-fade-in"
-              style={{ animationDelay: `${idx * 0.1}s` }}
-            >
-              <Image
-                src={getCategoryImage(cat, idx)}
-                alt={cat.name}
-                fill
-                className="object-cover transition-transform duration-700 group-hover:scale-110"
-                sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent z-10" />
-              <div className="absolute bottom-0 left-0 right-0 p-4 z-20">
-                <h3 className="text-white font-display font-semibold text-lg">
-                  {cat.name}
-                </h3>
-                <p className="text-white/70 text-xs mt-1 group-hover:text-brand transition-colors">
-                  {(categoryCounts[cat.id] || 0) === 1 ? "1 Product" : `${categoryCounts[cat.id] || 0} Products`}
-                </p>
-              </div>
-            </Link>
-          ))}
+        <div className="flex gap-4 md:gap-6 justify-center overflow-x-auto pb-2 px-2 -mx-2 scrollbar-hide">
+          {categories.map((cat) => {
+            const count = categoryCounts[cat.id] || 0;
+            return (
+              <Link
+                key={cat.id}
+                href={`/category/${cat.slug}`}
+                className="flex flex-col items-center shrink-0 group"
+              >
+                <div className="w-16 h-16 md:w-20 md:h-20 bg-brand rounded-full flex items-center justify-center mb-2 group-hover:bg-brand-dark transition-colors shadow-md">
+                  <span className="text-white font-display font-bold text-lg md:text-xl">{cat.name.charAt(0)}</span>
+                </div>
+                <span className="text-xs md:text-sm font-medium text-dark-600 text-center leading-tight">{cat.name}</span>
+                <span className="text-[10px] md:text-xs text-dark-400 mt-0.5">{count === 1 ? "1 Product" : `${count} Products`}</span>
+              </Link>
+            );
+          })}
         </div>
       </section>
 
@@ -269,37 +250,30 @@ export default function HomeClient({ categories, featured, newArrivals, banners,
 
 
       {/* Visit Our Store */}
-      <section className="bg-dark-50 py-8 md:py-16">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="max-w-3xl mx-auto text-center">
-            <h2 className="font-display text-xl md:text-2xl lg:text-3xl font-semibold mb-2">Visit Our Store</h2>
-            <p className="text-dark-400 text-sm mb-6 md:mb-10">Experience our premium collection in person</p>
-          </div>
-          <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
-            <div className="bg-white p-6 text-center">
-              <div className="w-12 h-12 bg-brand-50 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-6 h-6 text-brand" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-              </div>
-              <h3 className="font-display font-semibold text-lg mb-2">Our Location</h3>
-              <p className="text-dark-400 text-sm leading-relaxed">Police Plaza Concord Shopping Mall, Gulshan-1, Level 2, Shop No. 369-370, Dhaka, Bangladesh</p>
+      <section className="bg-dark-50 py-6 md:py-12">
+        <div className="max-w-2xl mx-auto px-4">
+          <h2 className="font-display text-lg md:text-2xl font-semibold text-center mb-1">Visit Our Store</h2>
+          <p className="text-dark-400 text-xs md:text-sm text-center mb-5">Experience our premium collection in person</p>
+          <div className="space-y-3 text-sm text-dark-500">
+            <div className="flex items-start gap-3">
+              <svg className="w-4 h-4 text-brand shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+              <span>Police Plaza Concord Shopping Mall, Gulshan-1, Level 2, Shop 369-370, Dhaka</span>
             </div>
-            <div className="bg-white p-6 text-center">
-              <div className="w-12 h-12 bg-brand-50 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-6 h-6 text-brand" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-              </div>
-              <h3 className="font-display font-semibold text-lg mb-2">Opening Hours</h3>
-              <p className="text-dark-400 text-sm leading-relaxed">Saturday &mdash; Thursday<br />10:00 AM &mdash; 9:00 PM</p>
+            <div className="flex items-center gap-3">
+              <svg className="w-4 h-4 text-brand shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+              <span>Sat &mdash; Thu, 10:00 AM &mdash; 9:00 PM</span>
             </div>
-            <div className="bg-white p-6 text-center">
-              <div className="w-12 h-12 bg-brand-50 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-6 h-6 text-brand" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>
-              </div>
-              <h3 className="font-display font-semibold text-lg mb-2">Contact Us</h3>
-              <p className="text-dark-400 text-sm leading-relaxed">+880 1718-389159<br />Noori330332@gmail.com</p>
+            <div className="flex items-center gap-3">
+              <svg className="w-4 h-4 text-brand shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>
+              <span>+880 1718-389159</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <svg className="w-4 h-4 text-brand shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+              <span>Noori330332@gmail.com</span>
             </div>
           </div>
-          <div className="text-center mt-8">
-            <a href="https://maps.google.com/?q=Police+Plaza+Concord+Gulshan+Dhaka" target="_blank" rel="noopener noreferrer" className="btn-primary inline-flex items-center gap-2">
+          <div className="text-center mt-5">
+            <a href="https://maps.google.com/?q=Police+Plaza+Concord+Gulshan+Dhaka" target="_blank" rel="noopener noreferrer" className="btn-primary inline-flex items-center gap-2 text-sm py-2.5 px-5">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
               Get Directions
             </a>

@@ -87,11 +87,11 @@ export default function Header() {
         }`}
       >
         <div className="max-w-7xl mx-auto px-4">
-          <div className="flex items-center justify-between h-16 md:h-20 gap-4">
+          <div className="flex items-center justify-between h-16 md:h-20 gap-4 relative">
             {/* Mobile Menu Button */}
             <button
               onClick={toggleMenu}
-              className="md:hidden p-2 -ml-2"
+              className="md:hidden p-2 -ml-2 z-10"
               aria-label="Menu"
             >
               <svg
@@ -118,8 +118,8 @@ export default function Header() {
               </svg>
             </button>
 
-            {/* Logo */}
-            <Link href="/" className="shrink-0">
+            {/* Logo — centered on mobile */}
+            <Link href="/" className="md:static absolute left-1/2 -translate-x-1/2 md:translate-x-0 shrink-0">
               <div className="bg-dark-600 rounded-lg px-2 py-1 flex items-center">
                 <Image
                   src="/logo.jpg"
@@ -167,7 +167,7 @@ export default function Header() {
             </form>
 
             {/* Actions */}
-            <div className="flex items-center gap-1 md:gap-3">
+            <div className="flex items-center gap-1 md:gap-3 z-10">
               {/* Mobile Search */}
               <button
                 onClick={toggleSearch}
