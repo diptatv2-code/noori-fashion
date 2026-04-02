@@ -7,6 +7,11 @@ const supabase = createClient(
 );
 
 export async function POST(req: NextRequest) {
+  console.log("=== ORDER API CALLED ===");
+  console.log("ENV: TELEGRAM_BOT_TOKEN =", process.env.TELEGRAM_BOT_TOKEN ? "SET" : "MISSING");
+  console.log("ENV: TELEGRAM_CHAT_ID =", process.env.TELEGRAM_CHAT_ID ? "SET" : "MISSING");
+  console.log("ENV: RESEND_API_KEY =", process.env.RESEND_API_KEY ? "SET" : "MISSING");
+
   try {
     const body = await req.json();
     const { items, ...orderData } = body;
@@ -52,8 +57,11 @@ export async function POST(req: NextRequest) {
 
     await supabase.from("nf_order_items").insert(orderItems);
 
-    sendTelegram(order, items).catch(console.error);
-    sendEmails(order, items).catch(console.error);
+    // MUST await — Vercel kills serverless function after response is sent
+    await Promise.allSettled([
+      sendTelegram(order, items),
+      sendEmails(order, items),
+    ]);
 
     return NextResponse.json({ order_number: order.order_number, order_id: order.id });
   } catch (err: any) {
@@ -65,6 +73,7 @@ export async function POST(req: NextRequest) {
 async function sendTelegram(order: any, items: any[]) {
   const token = process.env.TELEGRAM_BOT_TOKEN;
   const chatId = process.env.TELEGRAM_CHAT_ID;
+  console.log("TELEGRAM: token =", token ? "SET" : "MISSING", "chatId =", chatId ? "SET" : "MISSING");
   if (!token || !chatId) return;
 
   const lines: string[] = [];
@@ -88,16 +97,23 @@ async function sendTelegram(order: any, items: any[]) {
   ];
   if (order.transaction_id) parts.push(`TxnID: ${order.transaction_id}`);
 
-  await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ chat_id: chatId, text: parts.join("\n") }),
-  });
+  console.log("TELEGRAM: Sending to chat", chatId);
+  try {
+    const res = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ chat_id: chatId, text: parts.join("\n") }),
+    });
+    const data = await res.json();
+    console.log("TELEGRAM: Response", res.status, JSON.stringify(data));
+  } catch (e) {
+    console.error("TELEGRAM FAILED:", e);
+  }
 }
 
 async function sendEmails(order: any, items: any[]) {
   const apiKey = process.env.RESEND_API_KEY;
-  if (!apiKey) return;
+  if (!apiKey) { console.log("EMAIL: RESEND_API_KEY missing, skipping"); return; }
 
   const rows = items.map((i: any) => {
     const sz = i.variant_size ? ` (${i.variant_size})` : "";
@@ -127,9 +143,10 @@ async function sendEmails(order: any, items: any[]) {
     '</div></div>',
   ].join("");
 
-  // ALWAYS send to shop owner — regardless of customer email
+  // ALWAYS send to shop owner
   try {
-    await fetch("https://api.resend.com/emails", {
+    console.log("EMAIL: Sending to shop owner business@diptait.com.bd");
+    const res = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -139,14 +156,17 @@ async function sendEmails(order: any, items: any[]) {
         html,
       }),
     });
+    const data = await res.json();
+    console.log("EMAIL shop owner:", res.status, JSON.stringify(data));
   } catch (e) {
-    console.error("Shop owner email failed:", e);
+    console.error("EMAIL shop owner FAILED:", e);
   }
 
-  // Send to customer ONLY if they provided email
+  // Send to customer if they provided email
   if (order.customer_email) {
     try {
-      await fetch("https://api.resend.com/emails", {
+      console.log("EMAIL: Sending to customer", order.customer_email);
+      const res = await fetch("https://api.resend.com/emails", {
         method: "POST",
         headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -156,8 +176,10 @@ async function sendEmails(order: any, items: any[]) {
           html,
         }),
       });
+      const data = await res.json();
+      console.log("EMAIL customer:", res.status, JSON.stringify(data));
     } catch (e) {
-      console.error("Customer email failed:", e);
+      console.error("EMAIL customer FAILED:", e);
     }
   }
 }
