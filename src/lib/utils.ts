@@ -60,6 +60,8 @@ export function getStatusLabel(status: string): string {
     refunded: "Refunded",
     cod: "Cash on Delivery",
     bkash: "bKash",
+    bkash_50_advance: "bKash 50% Advance",
+    bkash_100_advance: "bKash 100% Advance",
   };
   return labels[status] || status;
 }

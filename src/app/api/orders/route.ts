@@ -70,6 +70,17 @@ export async function POST(req: NextRequest) {
   }
 }
 
+function formatPayment(method: string, total: number): string {
+  const half = Math.ceil(total / 2);
+  switch (method) {
+    case "cod": return "Cash on Delivery";
+    case "bkash": return `bKash Full Payment (${total} paid)`;
+    case "bkash_50_advance": return `bKash 50% Advance (${half} paid, ${total - half} due on delivery)`;
+    case "bkash_100_advance": return `bKash 100% Advance (${total} paid)`;
+    default: return method;
+  }
+}
+
 async function sendTelegram(order: any, items: any[]) {
   const token = process.env.TELEGRAM_BOT_TOKEN;
   const chatId = process.env.TELEGRAM_CHAT_ID;
@@ -93,7 +104,7 @@ async function sendTelegram(order: any, items: any[]) {
     ...lines,
     ``,
     `Total: ${order.total}`,
-    `Payment: ${order.payment_method}`,
+    `Payment: ${formatPayment(order.payment_method, order.total)}`,
   ];
   if (order.transaction_id) parts.push(`TxnID: ${order.transaction_id}`);
 
@@ -130,7 +141,7 @@ async function sendEmails(order: any, items: any[]) {
     `<p>Your order has been placed successfully. Order number: <strong>${order.order_number}</strong></p>`,
     `<p>Phone: ${order.customer_phone}</p>`,
     `<p>Address: ${order.shipping_address}, ${order.shipping_city}</p>`,
-    `<p>Payment: ${order.payment_method}${order.transaction_id ? ` (TxnID: ${order.transaction_id})` : ""}</p>`,
+    `<p>Payment: ${formatPayment(order.payment_method, order.total)}${order.transaction_id ? ` (TxnID: ${order.transaction_id})` : ""}</p>`,
     '<table style="width:100%;border-collapse:collapse;margin:16px 0">',
     '<thead><tr style="background:#f5f5f5"><th style="padding:8px;text-align:left">Product</th><th style="padding:8px;text-align:center">Qty</th><th style="padding:8px;text-align:right">Price</th></tr></thead>',
     `<tbody>${rows}</tbody>`,

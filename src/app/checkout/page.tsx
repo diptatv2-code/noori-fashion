@@ -5,6 +5,8 @@ import Link from "next/link";
 import { useCartStore, useAuthStore } from "@/lib/store";
 import { formatPrice } from "@/lib/utils";
 
+type PaymentMethod = "cod" | "bkash" | "bkash_50_advance" | "bkash_100_advance";
+
 export default function CheckoutPage() {
   const router = useRouter();
   const { items, getTotal, clearCart } = useCartStore();
@@ -12,7 +14,7 @@ export default function CheckoutPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [form, setForm] = useState({
-    name: "", phone: "", email: user?.email || "", address: "", city: "Dhaka", area: "", payment: "cod" as "cod" | "bkash", txnId: "", notes: "",
+    name: "", phone: "", email: user?.email || "", address: "", city: "Dhaka", area: "", payment: "cod" as PaymentMethod, txnId: "", notes: "",
   });
 
   const isDhaka = form.city === "Dhaka";
@@ -21,11 +23,20 @@ export default function CheckoutPage() {
   const total = subtotal + shipping;
   const advanceAmount = Math.ceil(total / 2);
 
-  // Auto-switch to bkash if outside Dhaka and COD selected
   const effectivePayment = useMemo(() => {
-    if (!isDhaka && form.payment === "cod") return "bkash";
+    if (!isDhaka && form.payment === "cod") return "bkash_50_advance" as PaymentMethod;
+    if (!isDhaka && form.payment === "bkash") return "bkash_50_advance" as PaymentMethod;
     return form.payment;
   }, [isDhaka, form.payment]);
+
+  const needsTxn = effectivePayment === "bkash" || effectivePayment === "bkash_50_advance" || effectivePayment === "bkash_100_advance";
+
+  const bkashPayAmount = useMemo(() => {
+    if (effectivePayment === "bkash") return total;
+    if (effectivePayment === "bkash_100_advance") return total;
+    if (effectivePayment === "bkash_50_advance") return advanceAmount;
+    return 0;
+  }, [effectivePayment, total, advanceAmount]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -34,8 +45,10 @@ export default function CheckoutPage() {
       setForm((prev) => ({
         ...prev,
         city: value,
-        payment: newIsDhaka ? prev.payment : "bkash",
+        payment: newIsDhaka ? "cod" : "bkash_50_advance",
       }));
+    } else if (name === "payment") {
+      setForm({ ...form, payment: value as PaymentMethod });
     } else {
       setForm({ ...form, [name]: value });
     }
@@ -45,7 +58,7 @@ export default function CheckoutPage() {
     e.preventDefault();
     if (items.length === 0) return;
     if (!form.name || !form.phone || !form.address) { setError("Please fill in all required fields"); return; }
-    if (effectivePayment === "bkash" && !form.txnId) { setError("Please enter the bKash transaction ID"); return; }
+    if (needsTxn && !form.txnId) { setError("Please enter the bKash transaction ID"); return; }
 
     setLoading(true);
     setError("");
@@ -132,13 +145,13 @@ export default function CheckoutPage() {
 
               {!isDhaka && (
                 <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200">
-                  <p className="text-sm text-yellow-800 font-medium">50% advance payment required for outside Dhaka delivery</p>
-                  <p className="text-xs text-yellow-700 mt-1">Pay {formatPrice(advanceAmount)} now via bKash. Remaining {formatPrice(total - advanceAmount)} on delivery.</p>
+                  <p className="text-sm text-yellow-800 font-medium">Advance bKash payment required for outside Dhaka delivery</p>
+                  <p className="text-xs text-yellow-700 mt-1">Choose 50% or 100% advance via bKash Make Payment.</p>
                 </div>
               )}
 
               <div className="space-y-3">
-                {/* COD - Dhaka only */}
+                {/* COD — Dhaka only */}
                 {isDhaka && (
                   <label className={`flex items-start gap-3 p-3 border cursor-pointer transition-colors ${effectivePayment === "cod" ? "border-brand bg-brand-50" : "border-dark-100 hover:border-dark-200"}`}>
                     <input type="radio" name="payment" value="cod" checked={effectivePayment === "cod"} onChange={handleChange} className="mt-1 accent-brand" />
@@ -149,28 +162,45 @@ export default function CheckoutPage() {
                   </label>
                 )}
 
-                {/* bKash - always available */}
-                <label className={`flex items-start gap-3 p-3 border cursor-pointer transition-colors ${effectivePayment === "bkash" ? "border-brand bg-brand-50" : "border-dark-100 hover:border-dark-200"}`}>
-                  <input type="radio" name="payment" value="bkash" checked={effectivePayment === "bkash"} onChange={handleChange} className="mt-1 accent-brand" />
-                  <div>
-                    <span className="text-sm font-medium">Pay via bKash</span>
-                    <p className="text-xs text-dark-400 mt-0.5">
-                      {isDhaka
-                        ? `Send ${formatPrice(total)} to bKash merchant: 01701019541`
-                        : `Send ${formatPrice(advanceAmount)} (50% advance) to bKash merchant: 01701019541`
-                      }
-                    </p>
-                  </div>
-                </label>
+                {/* bKash full — Dhaka only */}
+                {isDhaka && (
+                  <label className={`flex items-start gap-3 p-3 border cursor-pointer transition-colors ${effectivePayment === "bkash" ? "border-brand bg-brand-50" : "border-dark-100 hover:border-dark-200"}`}>
+                    <input type="radio" name="payment" value="bkash" checked={effectivePayment === "bkash"} onChange={handleChange} className="mt-1 accent-brand" />
+                    <div>
+                      <span className="text-sm font-medium">bKash Make Payment</span>
+                      <p className="text-xs text-dark-400 mt-0.5">Make Payment {formatPrice(total)} to bKash Merchant: 01955945219</p>
+                    </div>
+                  </label>
+                )}
+
+                {/* bKash 50% advance — outside Dhaka */}
+                {!isDhaka && (
+                  <label className={`flex items-start gap-3 p-3 border cursor-pointer transition-colors ${effectivePayment === "bkash_50_advance" ? "border-brand bg-brand-50" : "border-dark-100 hover:border-dark-200"}`}>
+                    <input type="radio" name="payment" value="bkash_50_advance" checked={effectivePayment === "bkash_50_advance"} onChange={handleChange} className="mt-1 accent-brand" />
+                    <div>
+                      <span className="text-sm font-medium">bKash 50% Advance</span>
+                      <p className="text-xs text-dark-400 mt-0.5">Make Payment {formatPrice(advanceAmount)} now, pay {formatPrice(total - advanceAmount)} on delivery</p>
+                    </div>
+                  </label>
+                )}
+
+                {/* bKash 100% advance — outside Dhaka */}
+                {!isDhaka && (
+                  <label className={`flex items-start gap-3 p-3 border cursor-pointer transition-colors ${effectivePayment === "bkash_100_advance" ? "border-brand bg-brand-50" : "border-dark-100 hover:border-dark-200"}`}>
+                    <input type="radio" name="payment" value="bkash_100_advance" checked={effectivePayment === "bkash_100_advance"} onChange={handleChange} className="mt-1 accent-brand" />
+                    <div>
+                      <span className="text-sm font-medium">bKash 100% Advance</span>
+                      <p className="text-xs text-dark-400 mt-0.5">Make Payment {formatPrice(total)} now — no payment on delivery</p>
+                    </div>
+                  </label>
+                )}
               </div>
 
-              {effectivePayment === "bkash" && (
+              {needsTxn && (
                 <div className="mt-4 p-3 bg-pink-50 border border-pink-200">
                   <p className="text-xs text-pink-800 mb-2 font-medium">
-                    {isDhaka
-                      ? `Send ${formatPrice(total)} to bKash: 01701019541`
-                      : `Send ${formatPrice(advanceAmount)} (50% advance) to bKash: 01701019541 — remaining ${formatPrice(total - advanceAmount)} on delivery`
-                    }
+                    Make Payment {formatPrice(bkashPayAmount)} to bKash Merchant: 01955945219
+                    {effectivePayment === "bkash_50_advance" && ` — remaining ${formatPrice(total - advanceAmount)} on delivery`}
                   </p>
                   <input name="txnId" value={form.txnId} onChange={handleChange} className="input-field text-sm" placeholder="bKash Transaction ID" required />
                 </div>
@@ -194,10 +224,15 @@ export default function CheckoutPage() {
                 <div className="flex justify-between"><span>Subtotal</span><span>{formatPrice(subtotal)}</span></div>
                 <div className="flex justify-between"><span>Shipping ({isDhaka ? "Dhaka" : "Outside Dhaka"})</span><span>{shipping === 0 ? "Free" : formatPrice(shipping)}</span></div>
                 <div className="border-t border-dark-200 pt-2 flex justify-between text-base font-bold"><span>Total</span><span className="text-brand">{formatPrice(total)}</span></div>
-                {!isDhaka && effectivePayment === "bkash" && (
+                {effectivePayment === "bkash_50_advance" && (
                   <div className="pt-1 space-y-1 text-xs text-dark-400">
                     <div className="flex justify-between"><span>Pay now (50%)</span><span className="font-medium text-brand">{formatPrice(advanceAmount)}</span></div>
                     <div className="flex justify-between"><span>Pay on delivery</span><span>{formatPrice(total - advanceAmount)}</span></div>
+                  </div>
+                )}
+                {effectivePayment === "bkash_100_advance" && (
+                  <div className="pt-1 text-xs text-dark-400">
+                    <div className="flex justify-between"><span>Pay now (100%)</span><span className="font-medium text-brand">{formatPrice(total)}</span></div>
                   </div>
                 )}
               </div>

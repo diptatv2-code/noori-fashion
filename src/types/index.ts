@@ -75,7 +75,7 @@ export interface Order {
   shipping_cost: number;
   discount: number;
   total: number;
-  payment_method: 'cod' | 'bkash';
+  payment_method: 'cod' | 'bkash' | 'bkash_50_advance' | 'bkash_100_advance';
   payment_status: string;
   order_status: string;
   transaction_id: string | null;
