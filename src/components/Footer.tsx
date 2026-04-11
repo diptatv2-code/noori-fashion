@@ -16,7 +16,7 @@ export default function Footer() {
                   alt="Noori Fashion"
                   width={140}
                   height={45}
-                  className="h-10 w-auto object-contain"
+                  className="h-14 md:h-16 w-auto object-contain"
                 />
               </div>
             </div>

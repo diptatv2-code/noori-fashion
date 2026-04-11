@@ -7,6 +7,14 @@ import { useCartStore, useAuthStore, useUIStore } from "@/lib/store";
 import { supabase } from "@/lib/supabase";
 import type { Category } from "@/types";
 
+const FALLBACK_CATEGORIES = [
+  { id: "f1", name: "Exclusive", slug: "exclusive" },
+  { id: "f2", name: "Stitch", slug: "stitch" },
+  { id: "f3", name: "Unstitch", slug: "unstitch" },
+  { id: "f4", name: "Plazo Set", slug: "plazo-set" },
+  { id: "f5", name: "Co-ord Set", slug: "co-ord-set" },
+];
+
 export default function Header() {
   const router = useRouter();
   const [categories, setCategories] = useState<Category[]>([]);
@@ -16,6 +24,7 @@ export default function Header() {
   const toggleCart = useCartStore((s) => s.toggleCart);
   const user = useAuthStore((s) => s.user);
   const { toggleSearch, isMenuOpen, toggleMenu } = useUIStore();
+  const displayCategories = categories.length > 0 ? categories : FALLBACK_CATEGORIES;
 
   useEffect(() => {
     const fetchCats = async () => {
@@ -59,7 +68,7 @@ export default function Header() {
       {/* Main Header — BLACK */}
       <header className={`sticky top-0 z-50 bg-black transition-shadow duration-300 ${scrolled ? "shadow-lg shadow-black/30" : ""}`}>
         <div className="max-w-7xl mx-auto px-4">
-          <div className="flex items-center h-[72px] md:h-24">
+          <div className="flex items-center h-[88px] md:h-28">
             {/* Mobile Menu */}
             <button onClick={toggleMenu} className="md:hidden p-2 -ml-2 text-white" aria-label="Menu">
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -72,7 +81,7 @@ export default function Header() {
             {/* Logo */}
             <div className="flex-1 flex justify-center md:justify-start md:flex-none">
               <Link href="/" className="shrink-0">
-                <Image src="/logo.jpg" alt="Noori Fashion" width={160} height={56} className="h-12 md:h-14 w-auto object-contain rounded" priority />
+                <Image src="/logo.jpg" alt="Noori Fashion" width={200} height={80} className="h-16 md:h-20 w-auto object-contain rounded" priority />
               </Link>
             </div>
 
@@ -91,10 +100,10 @@ export default function Header() {
               <button onClick={toggleSearch} className="md:hidden p-2 hover:text-brand transition-colors" aria-label="Search">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
               </button>
-              <Link href={user ? (user.role === "admin" ? "/admin" : "/account") : "/login"} className="p-2 hover:text-brand transition-colors" aria-label="Account">
+              <Link href={user?.role === "admin" ? "/admin" : "/account"} className="p-2 hover:text-brand transition-colors" aria-label="Account">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
               </Link>
-              <Link href="/wishlist" className="p-2 hover:text-brand transition-colors hidden md:block" aria-label="Wishlist">
+              <Link href="/wishlist" className="p-2 hover:text-brand transition-colors" aria-label="Wishlist">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
               </Link>
               <button onClick={toggleCart} className="p-2 hover:text-brand transition-colors relative" aria-label="Cart">
@@ -112,7 +121,7 @@ export default function Header() {
           <div className="max-w-7xl mx-auto px-4">
             <div className="flex items-center justify-center gap-1">
               <Link href="/" className="px-4 py-3 text-sm font-medium text-white/70 hover:text-brand transition-colors">Home</Link>
-              {categories.map((cat) => (
+              {displayCategories.map((cat) => (
                 <Link key={cat.id} href={`/category/${cat.slug}`} className="px-4 py-3 text-sm font-medium text-white/70 hover:text-brand transition-colors">{cat.name}</Link>
               ))}
               <Link href="/products" className="px-4 py-3 text-sm font-medium text-white/70 hover:text-brand transition-colors">All Products</Link>
@@ -127,12 +136,12 @@ export default function Header() {
           <div className="absolute inset-0 bg-black/60" onClick={toggleMenu} />
           <div className="absolute left-0 top-0 h-full w-72 bg-dark-800 animate-slide-in-right shadow-xl">
             <div className="p-4 border-b border-white/10 flex items-center justify-between">
-              <Image src="/logo.jpg" alt="Noori Fashion" width={120} height={40} className="h-10 w-auto object-contain rounded" />
+              <Image src="/logo.jpg" alt="Noori Fashion" width={140} height={48} className="h-12 w-auto object-contain rounded" />
               <button onClick={toggleMenu} className="p-1 text-white"><svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg></button>
             </div>
             <nav className="py-2">
               <Link href="/" onClick={toggleMenu} className="block px-4 py-3 text-sm font-medium text-white/80 hover:bg-white/5 hover:text-brand transition-colors border-b border-white/5">Home</Link>
-              {categories.map((cat) => (
+              {displayCategories.map((cat) => (
                 <Link key={cat.id} href={`/category/${cat.slug}`} onClick={toggleMenu} className="block px-4 py-3 text-sm font-medium text-white/80 hover:bg-white/5 hover:text-brand transition-colors border-b border-white/5">{cat.name}</Link>
               ))}
               <Link href="/products" onClick={toggleMenu} className="block px-4 py-3 text-sm font-medium text-white/80 hover:bg-white/5 hover:text-brand transition-colors border-b border-white/5">All Products</Link>
