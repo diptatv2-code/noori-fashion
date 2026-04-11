@@ -59,7 +59,7 @@ export default function Header() {
       {/* Main Header — BLACK */}
       <header className={`sticky top-0 z-50 bg-black transition-shadow duration-300 ${scrolled ? "shadow-lg shadow-black/30" : ""}`}>
         <div className="max-w-7xl mx-auto px-4">
-          <div className="flex items-center h-16 md:h-20">
+          <div className="flex items-center h-[72px] md:h-24">
             {/* Mobile Menu */}
             <button onClick={toggleMenu} className="md:hidden p-2 -ml-2 text-white" aria-label="Menu">
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -72,7 +72,7 @@ export default function Header() {
             {/* Logo */}
             <div className="flex-1 flex justify-center md:justify-start md:flex-none">
               <Link href="/" className="shrink-0">
-                <Image src="/logo.jpg" alt="Noori Fashion" width={120} height={40} className="h-9 md:h-10 w-auto object-contain rounded" priority />
+                <Image src="/logo.jpg" alt="Noori Fashion" width={160} height={56} className="h-12 md:h-14 w-auto object-contain rounded" priority />
               </Link>
             </div>
 
@@ -127,7 +127,7 @@ export default function Header() {
           <div className="absolute inset-0 bg-black/60" onClick={toggleMenu} />
           <div className="absolute left-0 top-0 h-full w-72 bg-dark-800 animate-slide-in-right shadow-xl">
             <div className="p-4 border-b border-white/10 flex items-center justify-between">
-              <Image src="/logo.jpg" alt="Noori Fashion" width={100} height={32} className="h-7 w-auto object-contain rounded" />
+              <Image src="/logo.jpg" alt="Noori Fashion" width={120} height={40} className="h-10 w-auto object-contain rounded" />
               <button onClick={toggleMenu} className="p-1 text-white"><svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg></button>
             </div>
             <nav className="py-2">
