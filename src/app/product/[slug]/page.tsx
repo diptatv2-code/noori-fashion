@@ -8,6 +8,16 @@ const supabase = createClient(
 );
 export const revalidate = 60;
 
+export async function generateMetadata({ params }: { params: { slug: string } }) {
+  const { data: product } = await supabase.from("nf_products").select("name, description").eq("slug", params.slug).single();
+  return {
+    title: product ? `${product.name} | Noori Fashion` : "Product | Noori Fashion",
+    description: product?.description || "Premium women's fashion at Noori Fashion.",
+  };
+}
+
+
+
 export default async function ProductPage({ params }: { params: { slug: string } }) {
   const { data: product } = await supabase
     .from("nf_products")

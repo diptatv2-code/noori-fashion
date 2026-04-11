@@ -108,7 +108,15 @@ function TrackOrderContent() {
 
 export default function TrackOrderPage() {
   return (
-    <Suspense fallback={<div className="max-w-2xl mx-auto px-4 py-12 text-center">Loading...</div>}>
+    <Suspense fallback={
+      <div className="max-w-2xl mx-auto px-4 py-12">
+        <h1 className="font-display text-2xl font-semibold text-center mb-8">Track Your Order</h1>
+        <div className="flex gap-2 mb-8">
+          <input className="input-field flex-1" placeholder="Order number or mobile number" disabled />
+          <button className="btn-primary px-6 text-sm opacity-50" disabled>Search</button>
+        </div>
+      </div>
+    }>
       <TrackOrderContent />
     </Suspense>
   );

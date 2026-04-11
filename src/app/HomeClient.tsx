@@ -13,6 +13,7 @@ const heroSlides = [
     subtitle: "Premium Indian boutique dresses — unique designs for festivals and special moments",
     cta: "/category/exclusive",
     ctaText: "View Collection",
+    viewAll: "/category/exclusive",
   },
   {
     image: "/banner-2.jpg",
@@ -20,6 +21,7 @@ const heroSlides = [
     subtitle: "Ready-made three-piece, plazo sets, co-ord sets — wear right away",
     cta: "/category/stitch",
     ctaText: "Shop Now",
+    viewAll: "/category/stitch",
   },
   {
     image: "/banner-3.jpg",
@@ -27,6 +29,7 @@ const heroSlides = [
     subtitle: "Latest trending designs and color combinations — limited stock available",
     cta: "/category/plazo-set",
     ctaText: "Order Now",
+    viewAll: "/products",
   },
 ];
 
@@ -101,7 +104,7 @@ export default function HomeClient({ categories, featured, newArrivals, banners,
                     style={{ animation: idx === currentSlide ? "slideInUp 0.6s ease-out 0.3s forwards" : "none", opacity: idx === currentSlide ? undefined : 0 }}
                   >
                     <Link href={slide.cta} className="btn-primary">{slide.ctaText}</Link>
-                    <Link href="/category/stitch" className="btn-outline border-white text-white hover:bg-white hover:text-dark-600">View All</Link>
+                    <Link href={slide.viewAll} className="btn-outline border-white text-white hover:bg-white hover:text-dark-600">View All</Link>
                   </div>
                 </div>
               </div>
@@ -140,7 +143,7 @@ export default function HomeClient({ categories, featured, newArrivals, banners,
           })}
         </div>
         <div className="text-center mt-4">
-          <Link href="/category/stitch" className="text-xs text-brand font-medium hover:underline">See All Collection &rarr;</Link>
+          <Link href="/products" className="text-xs text-brand font-medium hover:underline">See All Collection &rarr;</Link>
         </div>
       </section>
 

@@ -8,6 +8,16 @@ const supabase = createClient(
 );
 export const revalidate = 60;
 
+export async function generateMetadata({ params }: { params: { slug: string } }) {
+  const { data: category } = await supabase.from("nf_categories").select("name").eq("slug", params.slug).single();
+  return {
+    title: category ? `${category.name} Collection | Noori Fashion` : "Collection | Noori Fashion",
+    description: category ? `Shop ${category.name} collection at Noori Fashion — premium women's fashion in Bangladesh.` : undefined,
+  };
+}
+
+
+
 export default async function CategoryPage({ params, searchParams }: { params: { slug: string }; searchParams: { sort?: string; page?: string } }) {
   const { data: category } = await supabase.from("nf_categories").select("*").eq("slug", params.slug).single();
   if (!category) notFound();
