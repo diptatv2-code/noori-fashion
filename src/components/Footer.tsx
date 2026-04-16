@@ -1,5 +1,6 @@
 'use client';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useSettings } from '@/components/SettingsProvider';
 
 export default function Footer() {
@@ -12,7 +13,8 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Brand */}
           <div>
-            <h3 className="font-display text-xl font-bold mb-4">Noori <span className="text-brand">Fashion</span></h3>
+            <Image src="/logo.jpg" alt="Noori Fashion" width={64} height={64} className="h-16 w-16 rounded-full object-cover border border-white/20 mb-3" />
+            <h3 className="font-display text-xl font-bold mb-2">Noori <span className="text-brand">Fashion</span></h3>
             <p className="text-dark-200 text-sm leading-relaxed mb-4">
               Premium women&apos;s fashion brand from Bangladesh. Exclusive collections, superior fabrics, and top-tier designs.
             </p>

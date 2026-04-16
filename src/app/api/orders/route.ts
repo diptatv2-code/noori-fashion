@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
     const { items, ...orderData } = body;
 
     if (!items || items.length === 0) {
-      return NextResponse.json({ error: 'কার্ট খালি' }, { status: 400 });
+      return NextResponse.json({ error: 'Cart is empty' }, { status: 400 });
     }
 
     // Input validation (Issue #27)
@@ -33,11 +33,11 @@ export async function POST(req: NextRequest) {
     const notes = sanitize(orderData.notes || '', 1000);
 
     if (!customerName || !customerPhone || !shippingAddress || !shippingCity) {
-      return NextResponse.json({ error: 'সব তথ্য পূরণ করুন' }, { status: 400 });
+      return NextResponse.json({ error: 'Please fill in all required fields' }, { status: 400 });
     }
 
     if (!/^01[0-9]{9}$/.test(customerPhone.replace(/[^0-9]/g, '').replace(/^880/, '').replace(/^\+880/, ''))) {
-      return NextResponse.json({ error: 'সঠিক মোবাইল নম্বর দিন' }, { status: 400 });
+      return NextResponse.json({ error: 'Please enter a valid mobile number' }, { status: 400 });
     }
 
     // Fetch settings for shipping calculation
@@ -65,7 +65,7 @@ export async function POST(req: NextRequest) {
     for (const item of items) {
       const product = productMap.get(item.product_id);
       if (!product) {
-        return NextResponse.json({ error: `প্রোডাক্ট পাওয়া যায়নি` }, { status: 400 });
+        return NextResponse.json({ error: 'Product not found' }, { status: 400 });
       }
 
       const variant = item.variant_size
@@ -75,7 +75,7 @@ export async function POST(req: NextRequest) {
       // Stock validation (Issue #1)
       if (variant && variant.stock < item.quantity) {
         return NextResponse.json({
-          error: `${item.product_name} (${item.variant_size}) স্টকে নেই। বাকি আছে: ${variant.stock}`,
+          error: `${item.product_name} (${item.variant_size}) is out of stock. Available: ${variant.stock}`,
         }, { status: 400 });
       }
 
@@ -94,8 +94,9 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    // Compute shipping server-side
-    const computedShipping = computedSubtotal >= freeShippingMin ? 0 : shippingCity === 'ঢাকা' ? shippingDhaka : shippingOutside;
+    // Compute shipping server-side (match English city names from checkout)
+    const isDhaka = shippingCity === 'Dhaka' || shippingCity === 'ঢাকা';
+    const computedShipping = computedSubtotal >= freeShippingMin ? 0 : isDhaka ? shippingDhaka : shippingOutside;
     const computedTotal = computedSubtotal + computedShipping;
 
     // Insert order with server-computed totals
@@ -157,7 +158,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ order_number: order.order_number, order_id: order.id });
   } catch (err: any) {
     console.error('Order error:', err);
-    return NextResponse.json({ error: err.message || 'অর্ডার করতে সমস্যা হয়েছে' }, { status: 500 });
+    return NextResponse.json({ error: err.message || 'Failed to place order' }, { status: 500 });
   }
 }
 
@@ -167,30 +168,30 @@ async function sendTelegram(order: any, items: any[]) {
   if (!token || !chatId) return;
 
   const paymentLabels: Record<string, string> = {
-    cod: 'ক্যাশ অন ডেলিভারি', bkash: 'বিকাশ', nagad: 'নগদ',
-    bkash_50_advance: 'বিকাশ (৫০% অ্যাডভান্স)', bkash_100_advance: 'বিকাশ (১০০% অ্যাডভান্স)',
+    cod: 'Cash on Delivery', bkash: 'bKash', nagad: 'Nagad',
+    bkash_50_advance: 'bKash (50% Advance)', bkash_100_advance: 'bKash (100% Advance)',
   };
 
   const itemsList = items.map((i: any) => `  • ${i.product_name}${i.variant_size ? ` (${i.variant_size})` : ''} × ${i.quantity} = ৳${i.total_price}`).join('\n');
 
-  const msg = `🛍️ *নতুন অর্ডার — নূরী ফ্যাশন*
+  const msg = `🛍️ *New Order — Noori Fashion*
 
-📋 অর্ডার: \`${order.order_number}\`
-👤 নাম: ${order.customer_name}
-📱 ফোন: ${order.customer_phone}
-📧 ইমেইল: ${order.customer_email || 'N/A'}
-📍 ঠিকানা: ${order.shipping_address}, ${order.shipping_city}
+📋 Order: \`${order.order_number}\`
+👤 Name: ${order.customer_name}
+📱 Phone: ${order.customer_phone}
+📧 Email: ${order.customer_email || 'N/A'}
+📍 Address: ${order.shipping_address}, ${order.shipping_city}
 
-🛒 প্রোডাক্ট:
+🛒 Products:
 ${itemsList}
 
-💰 সাবটোটাল: ৳${order.subtotal}
-🚚 শিপিং: ৳${order.shipping_cost}
-💵 *মোট: ৳${order.total}*
+💰 Subtotal: ৳${order.subtotal}
+🚚 Shipping: ৳${order.shipping_cost}
+💵 *Total: ৳${order.total}*
 
-💳 পেমেন্ট: ${paymentLabels[order.payment_method] || order.payment_method}
+💳 Payment: ${paymentLabels[order.payment_method] || order.payment_method}
 ${order.transaction_id ? `🔑 TxnID: ${order.transaction_id}` : ''}
-${order.notes ? `📝 নোট: ${order.notes}` : ''}`;
+${order.notes ? `📝 Notes: ${order.notes}` : ''}`;
 
   await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
     method: 'POST',
@@ -210,22 +211,22 @@ async function sendEmail(order: any, items: any[], ownerEmail: string) {
   const html = `
     <div style="max-width:600px;margin:0 auto;font-family:sans-serif">
       <div style="background:#1A1A1A;padding:20px;text-align:center">
-        <h1 style="color:#E85D24;margin:0;font-size:24px">নূরী ফ্যাশন</h1>
+        <h1 style="color:#E85D24;margin:0;font-size:24px">Noori Fashion</h1>
       </div>
       <div style="padding:24px;background:#fff">
-        <h2 style="color:#333;margin:0 0 16px">অর্ডার কনফার্মেশন</h2>
-        <p>প্রিয় ${escapeHtml(order.customer_name)},</p>
-        <p>আপনার অর্ডার সফলভাবে প্লেস হয়েছে। অর্ডার নম্বর: <strong>${escapeHtml(order.order_number)}</strong></p>
+        <h2 style="color:#333;margin:0 0 16px">Order Confirmation</h2>
+        <p>Dear ${escapeHtml(order.customer_name)},</p>
+        <p>Your order has been placed successfully. Order number: <strong>${escapeHtml(order.order_number)}</strong></p>
         <table style="width:100%;border-collapse:collapse;margin:16px 0">
-          <thead><tr style="background:#f5f5f5"><th style="padding:8px;text-align:left">প্রোডাক্ট</th><th style="padding:8px;text-align:center">পরিমাণ</th><th style="padding:8px;text-align:right">মূল্য</th></tr></thead>
+          <thead><tr style="background:#f5f5f5"><th style="padding:8px;text-align:left">Product</th><th style="padding:8px;text-align:center">Qty</th><th style="padding:8px;text-align:right">Price</th></tr></thead>
           <tbody>${itemsHtml}</tbody>
           <tfoot>
-            <tr><td colspan="2" style="padding:8px;text-align:right">সাবটোটাল</td><td style="padding:8px;text-align:right">৳${order.subtotal}</td></tr>
-            <tr><td colspan="2" style="padding:8px;text-align:right">শিপিং</td><td style="padding:8px;text-align:right">৳${order.shipping_cost}</td></tr>
-            <tr style="font-weight:bold"><td colspan="2" style="padding:8px;text-align:right;border-top:2px solid #E85D24">মোট</td><td style="padding:8px;text-align:right;border-top:2px solid #E85D24;color:#E85D24">৳${order.total}</td></tr>
+            <tr><td colspan="2" style="padding:8px;text-align:right">Subtotal</td><td style="padding:8px;text-align:right">৳${order.subtotal}</td></tr>
+            <tr><td colspan="2" style="padding:8px;text-align:right">Shipping</td><td style="padding:8px;text-align:right">৳${order.shipping_cost}</td></tr>
+            <tr style="font-weight:bold"><td colspan="2" style="padding:8px;text-align:right;border-top:2px solid #E85D24">Total</td><td style="padding:8px;text-align:right;border-top:2px solid #E85D24;color:#E85D24">৳${order.total}</td></tr>
           </tfoot>
         </table>
-        <p style="color:#666;font-size:14px">ধন্যবাদ নূরী ফ্যাশন থেকে শপিং করার জন্য!</p>
+        <p style="color:#666;font-size:14px">Thank you for shopping with Noori Fashion!</p>
       </div>
     </div>`;
 
@@ -237,7 +238,7 @@ async function sendEmail(order: any, items: any[], ownerEmail: string) {
       body: JSON.stringify({
         from: 'Noori Fashion <noreply@diptait.com.bd>',
         to: [order.customer_email],
-        subject: `অর্ডার কনফার্মেশন — ${order.order_number} | নূরী ফ্যাশন`,
+        subject: `Order Confirmation — ${order.order_number} | Noori Fashion`,
         html,
       }),
     });
@@ -250,7 +251,7 @@ async function sendEmail(order: any, items: any[], ownerEmail: string) {
     body: JSON.stringify({
       from: 'Noori Fashion <noreply@diptait.com.bd>',
       to: [ownerEmail],
-      subject: `নতুন অর্ডার — ${order.order_number} | ৳${order.total}`,
+      subject: `New Order — ${order.order_number} | ৳${order.total}`,
       html,
     }),
   });

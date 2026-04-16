@@ -144,14 +144,14 @@ export default function HomeClient({ categories, featured, newArrivals, banners 
               >
                 <Image
                   src={cat.image ? getImageUrl(cat.image) : bgImages[idx % bgImages.length]}
-                  alt={cat.name_bn || cat.name}
+                  alt={cat.name}
                   fill
                   className="object-cover transition-transform duration-700 group-hover:scale-110"
                   sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent z-10" />
                 <div className="absolute bottom-0 left-0 right-0 p-4 z-20">
-                  <h3 className="text-white font-display font-semibold text-lg">{cat.name_bn || cat.name}</h3>
+                  <h3 className="text-white font-display font-semibold text-lg">{cat.name}</h3>
                   <p className="text-white/70 text-xs mt-1 group-hover:text-brand transition-colors">View Collection →</p>
                 </div>
               </Link>

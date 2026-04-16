@@ -59,9 +59,9 @@ export default function Header({ categories }: { categories: Category[] }) {
               <Image
                 src="/logo.jpg"
                 alt="Noori Fashion"
-                width={180}
-                height={60}
-                className="h-10 md:h-[60px] w-auto object-contain"
+                width={80}
+                height={80}
+                className="h-14 w-14 md:h-20 md:w-20 rounded-full object-cover border border-dark-100"
                 priority
               />
             </Link>
@@ -75,7 +75,7 @@ export default function Header({ categories }: { categories: Category[] }) {
                   href={`/category/${cat.slug}`}
                   className="px-3 py-2 text-sm font-medium text-dark-600 hover:text-brand transition-colors"
                 >
-                  {cat.name_bn || cat.name}
+                  {cat.name}
                 </Link>
               ))}
             </nav>
@@ -129,7 +129,7 @@ export default function Header({ categories }: { categories: Category[] }) {
                   onClick={toggleMenu}
                   className="block px-4 py-3 text-sm font-medium hover:bg-brand-50 hover:text-brand transition-colors border-b border-dark-50"
                 >
-                  {cat.name_bn || cat.name}
+                  {cat.name}
                 </Link>
               ))}
               <Link href="/track-order" onClick={toggleMenu} className="block px-4 py-3 text-sm font-medium hover:bg-brand-50 hover:text-brand transition-colors border-b border-dark-50">

@@ -9,7 +9,7 @@ const supabase = createClient(
 export async function GET(req: NextRequest) {
   const query = req.nextUrl.searchParams.get('q')?.trim();
   if (!query) {
-    return NextResponse.json({ error: 'অর্ডার নম্বর বা মোবাইল নম্বর দিন' }, { status: 400 });
+    return NextResponse.json({ error: 'Please enter an order number or mobile number' }, { status: 400 });
   }
 
   const { data } = await supabase
