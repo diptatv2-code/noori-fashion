@@ -128,32 +128,32 @@ export default function HomeClient({ categories, featured, newArrivals, banners 
         )}
       </section>
 
-      {/* Category Grid */}
-      <section className="max-w-7xl mx-auto px-4 py-12 md:py-16">
+      {/* Category Icons */}
+      <section className="max-w-5xl mx-auto px-4 py-12 md:py-16">
         <h2 className="section-title">Our Collection</h2>
         <p className="text-center text-dark-400 text-sm mb-8">Browse our finest categories</p>
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 md:gap-4">
+        <div className="flex justify-center gap-6 md:gap-8 overflow-x-auto pb-2">
           {categories.map((cat, idx) => {
             const bgImages = ['/banner-1.jpg', '/banner-2.jpg', '/banner-3.jpg', '/banner-1.jpg', '/banner-2.jpg'];
             return (
               <Link
                 key={cat.id}
                 href={`/category/${cat.slug}`}
-                className="group relative bg-dark-50 aspect-[4/5] overflow-hidden animate-fade-in"
+                className="group flex flex-col items-center shrink-0 animate-fade-in"
                 style={{ animationDelay: `${idx * 0.1}s` }}
               >
-                <Image
-                  src={cat.image ? getImageUrl(cat.image) : bgImages[idx % bgImages.length]}
-                  alt={cat.name}
-                  fill
-                  className="object-cover transition-transform duration-700 group-hover:scale-110"
-                  sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent z-10" />
-                <div className="absolute bottom-0 left-0 right-0 p-4 z-20">
-                  <h3 className="text-white font-display font-semibold text-lg">{cat.name}</h3>
-                  <p className="text-white/70 text-xs mt-1 group-hover:text-brand transition-colors">View Collection →</p>
+                <div className="relative w-[90px] h-[90px] md:w-[130px] md:h-[130px] rounded-full overflow-hidden border border-dark-100 group-hover:shadow-lg group-hover:scale-105 transition-all duration-300">
+                  <Image
+                    src={cat.image ? getImageUrl(cat.image) : bgImages[idx % bgImages.length]}
+                    alt={cat.name}
+                    fill
+                    className="object-cover"
+                    sizes="130px"
+                  />
                 </div>
+                <span className="mt-3 text-xs md:text-sm font-medium text-dark-600 group-hover:text-brand transition-colors text-center">
+                  {cat.name}
+                </span>
               </Link>
             );
           })}
