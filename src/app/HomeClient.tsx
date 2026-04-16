@@ -129,9 +129,9 @@ export default function HomeClient({ categories, featured, newArrivals, banners 
       </section>
 
       {/* Category Icons */}
-      <section className="max-w-5xl mx-auto px-4 py-12 md:py-16">
+      <section className="max-w-5xl mx-auto px-4 py-8 md:py-12">
         <h2 className="section-title">Our Collection</h2>
-        <p className="text-center text-dark-400 text-sm mb-8">Browse our finest categories</p>
+        <p className="text-center text-dark-400 text-sm mb-6">Browse our finest categories</p>
         <div className="flex justify-center gap-6 md:gap-8 overflow-x-auto pb-2">
           {categories.map((cat, idx) => {
             const bgImages = ['/banner-1.jpg', '/banner-2.jpg', '/banner-3.jpg', '/banner-1.jpg', '/banner-2.jpg'];
@@ -162,8 +162,8 @@ export default function HomeClient({ categories, featured, newArrivals, banners 
 
       {/* Featured Products */}
       {featured.length > 0 && (
-        <section className="max-w-7xl mx-auto px-4 py-8 md:py-12">
-          <div className="flex items-center justify-between mb-8">
+        <section className="max-w-7xl mx-auto px-4 py-6 md:py-10">
+          <div className="flex items-center justify-between mb-6">
             <div>
               <h2 className="font-display text-2xl md:text-3xl font-semibold">Featured Collection</h2>
               <p className="text-dark-400 text-sm mt-1">Our top picks for you</p>
@@ -181,7 +181,7 @@ export default function HomeClient({ categories, featured, newArrivals, banners 
       )}
 
       {/* Mid-page Banner */}
-      <section className="relative h-[50vh] md:h-[60vh] overflow-hidden">
+      <section className="relative h-[40vh] md:h-[50vh] overflow-hidden">
         <Image src="/banner-2.jpg" alt="Noori Fashion Collection" fill className="object-cover" sizes="100vw" />
         <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-transparent" />
         <div className="absolute inset-0 flex items-center">
@@ -191,11 +191,11 @@ export default function HomeClient({ categories, featured, newArrivals, banners 
               <h2 className="font-display text-3xl md:text-4xl font-bold text-white leading-tight mb-3">
                 <span className="text-brand">Free Delivery</span> on orders ৳{settings.free_shipping_min.toLocaleString('en-BD')}+
               </h2>
-              <p className="text-white/70 text-sm md:text-base mb-6">Delivery across Bangladesh. Pay via Cash on Delivery, bKash, Nagad — any method you prefer.</p>
+              <p className="text-white/70 text-sm md:text-base mb-4">Delivery across Bangladesh. Pay via Cash on Delivery, bKash, Nagad — any method you prefer.</p>
               <div className="flex gap-3 flex-wrap">
                 <Link href="/products" className="btn-primary text-sm">Start Shopping</Link>
               </div>
-              <div className="flex gap-6 mt-8">
+              <div className="flex gap-6 mt-5">
                 <div className="text-center">
                   <div className="w-11 h-11 border border-brand/50 rounded-full flex items-center justify-center mb-1.5">
                     <svg className="w-5 h-5 text-brand" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" /></svg>
@@ -222,8 +222,8 @@ export default function HomeClient({ categories, featured, newArrivals, banners 
 
       {/* New Arrivals */}
       {newArrivals.length > 0 && (
-        <section className="max-w-7xl mx-auto px-4 py-12 md:py-16">
-          <div className="flex items-center justify-between mb-8">
+        <section className="max-w-7xl mx-auto px-4 py-8 md:py-12">
+          <div className="flex items-center justify-between mb-6">
             <div>
               <h2 className="font-display text-2xl md:text-3xl font-semibold">New Arrivals</h2>
               <p className="text-dark-400 text-sm mt-1">Latest additions to our store</p>
@@ -241,14 +241,14 @@ export default function HomeClient({ categories, featured, newArrivals, banners 
       )}
 
       {/* About / Trust Section */}
-      <section className="relative py-16 md:py-20 overflow-hidden">
+      <section className="relative py-8 md:py-12 overflow-hidden">
         <div className="absolute inset-0">
           <Image src="/banner-3.jpg" alt="" fill className="object-cover" sizes="100vw" />
           <div className="absolute inset-0 bg-black/75 backdrop-blur-[2px]" />
         </div>
         <div className="relative max-w-4xl mx-auto px-4 text-center z-10">
-          <h2 className="font-display text-2xl md:text-3xl font-semibold text-white mb-4">Why Choose Noori Fashion?</h2>
-          <p className="text-white/80 text-sm md:text-base leading-relaxed mb-8">
+          <h2 className="font-display text-2xl md:text-3xl font-semibold text-white mb-2">Why Choose Noori Fashion?</h2>
+          <p className="text-white/80 text-sm md:text-base leading-relaxed mb-6">
             Noori Fashion is one of Bangladesh&apos;s leading premium women&apos;s fashion brands. We offer exclusive Indian boutique collections,
             premium stitched and unstitched dresses, trendy plazo sets, and elegant co-ord sets.
             Every product is carefully curated with the highest quality assurance.
