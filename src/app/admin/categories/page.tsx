@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { supabase } from "@/lib/supabase";
-import { getImageUrl } from "@/lib/utils";
+import { getImageUrl } from "@/lib/supabase";
 import type { Category } from "@/types";
 
 export default function AdminCategoriesPage() {

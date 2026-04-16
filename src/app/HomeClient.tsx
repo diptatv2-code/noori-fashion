@@ -13,6 +13,7 @@ interface Props {
   featured: Product[];
   newArrivals: Product[];
   banners: Banner[];
+  categoryCounts?: Record<string, number>;
 }
 
 export default function HomeClient({ categories, featured, newArrivals, banners }: Props) {
