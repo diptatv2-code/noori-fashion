@@ -27,7 +27,7 @@ export default function ProductCard({ product }: { product: Product }) {
   return (
     <div className="group relative animate-fade-in">
       {/* Badges */}
-      {product.is_new && <span className="badge-new">নতুন</span>}
+      {product.is_new && <span className="badge-new">New</span>}
       {discount > 0 && <span className="badge-sale">-{discount}%</span>}
 
       {/* Image */}
@@ -56,13 +56,13 @@ export default function ProductCard({ product }: { product: Product }) {
               onClick={(e) => { e.preventDefault(); setQuickView(product); }}
               className="flex-1 bg-white text-dark-600 text-xs font-medium py-2 hover:bg-brand hover:text-white transition-colors text-center"
             >
-              কুইক ভিউ
+              Quick View
             </button>
             <button
               onClick={(e) => { e.preventDefault(); addItem(product, 1); }}
               className="flex-1 bg-brand text-white text-xs font-medium py-2 hover:bg-brand-dark transition-colors text-center"
             >
-              ব্যাগে যোগ
+              Add to Bag
             </button>
           </div>
         </div>

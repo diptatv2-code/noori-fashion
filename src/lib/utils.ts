@@ -39,27 +39,27 @@ export function getStatusColor(status: string): string {
 
 export function getStatusLabel(status: string): string {
   const labels: Record<string, string> = {
-    pending: 'পেন্ডিং',
-    confirmed: 'কনফার্মড',
-    processing: 'প্রসেসিং',
-    shipped: 'শিপড',
-    delivered: 'ডেলিভারড',
-    cancelled: 'বাতিল',
-    returned: 'রিটার্ন',
-    paid: 'পেইড',
-    failed: 'ফেইলড',
-    refunded: 'রিফান্ড',
-    cod: 'ক্যাশ অন ডেলিভারি',
-    bkash: 'বিকাশ',
-    nagad: 'নগদ',
+    pending: 'Pending',
+    confirmed: 'Confirmed',
+    processing: 'Processing',
+    shipped: 'Shipped',
+    delivered: 'Delivered',
+    cancelled: 'Cancelled',
+    returned: 'Returned',
+    paid: 'Paid',
+    failed: 'Failed',
+    refunded: 'Refunded',
+    cod: 'Cash on Delivery',
+    bkash: 'bKash',
+    nagad: 'Nagad',
   };
   return labels[status] || status;
 }
 
 export function getStatusLabelPayment(status: string): string {
   const labels: Record<string, string> = {
-    bkash_50_advance: 'বিকাশ (৫০% অ্যাডভান্স)',
-    bkash_100_advance: 'বিকাশ (১০০% অ্যাডভান্স)',
+    bkash_50_advance: 'bKash (50% Advance)',
+    bkash_100_advance: 'bKash (100% Advance)',
   };
   return labels[status] || getStatusLabel(status);
 }

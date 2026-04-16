@@ -12,9 +12,9 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Brand */}
           <div>
-            <h3 className="font-display text-xl font-bold mb-4">নূরী <span className="text-brand">ফ্যাশন</span></h3>
+            <h3 className="font-display text-xl font-bold mb-4">Noori <span className="text-brand">Fashion</span></h3>
             <p className="text-dark-200 text-sm leading-relaxed mb-4">
-              বাংলাদেশের প্রিমিয়াম মহিলা ফ্যাশন ব্র্যান্ড। এক্সক্লুসিভ কালেকশন, উন্নত মানের কাপড় এবং সেরা ডিজাইন।
+              Premium women&apos;s fashion brand from Bangladesh. Exclusive collections, superior fabrics, and top-tier designs.
             </p>
             <div className="flex gap-3">
               <a href={settings.facebook} target="_blank" rel="noopener noreferrer" className="w-9 h-9 bg-white/10 flex items-center justify-center hover:bg-brand transition-colors" aria-label="Facebook">
@@ -28,30 +28,30 @@ export default function Footer() {
 
           {/* Quick Links */}
           <div>
-            <h4 className="font-semibold text-sm uppercase tracking-wider mb-4">কুইক লিংক</h4>
+            <h4 className="font-semibold text-sm uppercase tracking-wider mb-4">Quick Links</h4>
             <ul className="space-y-2 text-sm text-dark-200">
-              <li><Link href="/category/exclusive" className="hover:text-brand transition-colors">এক্সক্লুসিভ</Link></li>
-              <li><Link href="/category/stitch" className="hover:text-brand transition-colors">স্টিচ</Link></li>
-              <li><Link href="/category/unstitch" className="hover:text-brand transition-colors">আনস্টিচ</Link></li>
-              <li><Link href="/category/plazo-set" className="hover:text-brand transition-colors">প্লাজো সেট</Link></li>
-              <li><Link href="/category/co-ord-set" className="hover:text-brand transition-colors">কো-অর্ড সেট</Link></li>
+              <li><Link href="/category/exclusive" className="hover:text-brand transition-colors">Exclusive</Link></li>
+              <li><Link href="/category/stitch" className="hover:text-brand transition-colors">Stitch</Link></li>
+              <li><Link href="/category/unstitch" className="hover:text-brand transition-colors">Unstitch</Link></li>
+              <li><Link href="/category/plazo-set" className="hover:text-brand transition-colors">Plazo Set</Link></li>
+              <li><Link href="/category/co-ord-set" className="hover:text-brand transition-colors">Co-ord Set</Link></li>
             </ul>
           </div>
 
           {/* Customer Service */}
           <div>
-            <h4 className="font-semibold text-sm uppercase tracking-wider mb-4">কাস্টমার সার্ভিস</h4>
+            <h4 className="font-semibold text-sm uppercase tracking-wider mb-4">Customer Service</h4>
             <ul className="space-y-2 text-sm text-dark-200">
-              <li><Link href="/track-order" className="hover:text-brand transition-colors">অর্ডার ট্র্যাক</Link></li>
-              <li><Link href="/account" className="hover:text-brand transition-colors">আমার অ্যাকাউন্ট</Link></li>
-              <li><Link href="/products" className="hover:text-brand transition-colors">সকল প্রোডাক্ট</Link></li>
-              <li><Link href="/cart" className="hover:text-brand transition-colors">শপিং কার্ট</Link></li>
+              <li><Link href="/track-order" className="hover:text-brand transition-colors">Track Order</Link></li>
+              <li><Link href="/account" className="hover:text-brand transition-colors">My Account</Link></li>
+              <li><Link href="/products" className="hover:text-brand transition-colors">All Products</Link></li>
+              <li><Link href="/cart" className="hover:text-brand transition-colors">Shopping Cart</Link></li>
             </ul>
           </div>
 
           {/* Contact & Payment */}
           <div>
-            <h4 className="font-semibold text-sm uppercase tracking-wider mb-4">যোগাযোগ</h4>
+            <h4 className="font-semibold text-sm uppercase tracking-wider mb-4">Contact</h4>
             <ul className="space-y-3 text-sm text-dark-200">
               <li className="flex items-start gap-2">
                 <svg className="w-4 h-4 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>
@@ -63,10 +63,10 @@ export default function Footer() {
               </li>
             </ul>
             <div className="mt-4">
-              <p className="text-xs uppercase tracking-wider mb-2 text-dark-300">পেমেন্ট মেথড</p>
+              <p className="text-xs uppercase tracking-wider mb-2 text-dark-300">Payment Methods</p>
               <div className="flex gap-2 text-xs">
-                <span className="bg-white/10 px-3 py-1.5">বিকাশ</span>
-                <span className="bg-white/10 px-3 py-1.5">নগদ</span>
+                <span className="bg-white/10 px-3 py-1.5">bKash</span>
+                <span className="bg-white/10 px-3 py-1.5">Nagad</span>
                 <span className="bg-white/10 px-3 py-1.5">COD</span>
               </div>
             </div>
@@ -74,7 +74,7 @@ export default function Footer() {
         </div>
 
         <div className="border-t border-white/10 mt-10 pt-6 text-center text-xs text-dark-300">
-          <p>&copy; {new Date().getFullYear()} নূরী ফ্যাশন। সর্বস্বত্ব সংরক্ষিত।</p>
+          <p>&copy; {new Date().getFullYear()} Noori Fashion. All rights reserved.</p>
         </div>
       </div>
     </footer>

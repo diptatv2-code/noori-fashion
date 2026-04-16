@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useCartStore, useAuthStore, useUIStore } from '@/lib/store';
 import { useSettings } from '@/components/SettingsProvider';
 import type { Category } from '@/types';
@@ -14,7 +15,7 @@ export default function Header({ categories }: { categories: Category[] }) {
   const settings = useSettings();
 
   const whatsappNumber = settings.whatsapp.replace(/[^0-9]/g, '');
-  const shippingText = `ঢাকায় ডেলিভারি ৳${settings.shipping_dhaka} | ঢাকার বাইরে ৳${settings.shipping_outside} | ৳${settings.free_shipping_min.toLocaleString('en-BD')}+ অর্ডারে ফ্রি ডেলিভারি`;
+  const shippingText = `Delivery in Dhaka: ৳${settings.shipping_dhaka} | Outside Dhaka: ৳${settings.shipping_outside} | Free Shipping on ৳${settings.free_shipping_min.toLocaleString('en-BD')}+ Orders`;
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40);
@@ -27,7 +28,7 @@ export default function Header({ categories }: { categories: Category[] }) {
       {/* Top Bar */}
       <div className="bg-dark-600 text-white text-xs py-2 hidden md:block">
         <div className="max-w-7xl mx-auto px-4 flex justify-between items-center">
-          <p className="font-bengali">{shippingText}</p>
+          <p>{shippingText}</p>
           <div className="flex items-center gap-4">
             <a href={`tel:${settings.phone}`} className="hover:text-brand transition-colors flex items-center gap-1">
               <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>
@@ -39,11 +40,11 @@ export default function Header({ categories }: { categories: Category[] }) {
       </div>
 
       {/* Main Header */}
-      <header className={`sticky top-0 z-50 bg-dark-800 transition-shadow duration-300 ${scrolled ? 'shadow-md' : 'shadow-sm'}`}>
+      <header className={`sticky top-0 z-50 bg-white transition-shadow duration-300 ${scrolled ? 'shadow-md' : 'shadow-sm'}`}>
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex items-center justify-between h-16 md:h-20">
             {/* Mobile Menu */}
-            <button onClick={toggleMenu} className="md:hidden p-2 -ml-2 text-white" aria-label="Menu">
+            <button onClick={toggleMenu} className="md:hidden p-2 -ml-2 text-dark-800" aria-label="Menu">
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 {isMenuOpen ? (
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -55,19 +56,24 @@ export default function Header({ categories }: { categories: Category[] }) {
 
             {/* Logo */}
             <Link href="/" className="flex items-center gap-2">
-              <span className="font-display text-xl md:text-2xl font-bold text-white tracking-tight">
-                নূরী <span className="text-brand">ফ্যাশন</span>
-              </span>
+              <Image
+                src="/logo.jpg"
+                alt="Noori Fashion"
+                width={180}
+                height={60}
+                className="h-10 md:h-[60px] w-auto object-contain"
+                priority
+              />
             </Link>
 
             {/* Desktop Nav */}
             <nav className="hidden md:flex items-center gap-1">
-              <Link href="/" className="px-3 py-2 text-sm font-medium text-dark-200 hover:text-brand transition-colors">হোম</Link>
+              <Link href="/" className="px-3 py-2 text-sm font-medium text-dark-600 hover:text-brand transition-colors">Home</Link>
               {categories.map((cat) => (
                 <Link
                   key={cat.id}
                   href={`/category/${cat.slug}`}
-                  className="px-3 py-2 text-sm font-medium text-dark-200 hover:text-brand transition-colors"
+                  className="px-3 py-2 text-sm font-medium text-dark-600 hover:text-brand transition-colors"
                 >
                   {cat.name_bn || cat.name}
                 </Link>
@@ -75,7 +81,7 @@ export default function Header({ categories }: { categories: Category[] }) {
             </nav>
 
             {/* Actions */}
-            <div className="flex items-center gap-2 md:gap-3 text-white">
+            <div className="flex items-center gap-2 md:gap-3 text-dark-600">
               <button onClick={toggleSearch} className="p-2 hover:text-brand transition-colors" aria-label="Search">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
               </button>
@@ -109,13 +115,13 @@ export default function Header({ categories }: { categories: Category[] }) {
           <div className="absolute inset-0 bg-black/50" onClick={toggleMenu} />
           <div className="absolute left-0 top-0 h-full w-72 bg-white animate-slide-in-right shadow-xl">
             <div className="p-4 border-b flex items-center justify-between">
-              <span className="font-display text-lg font-bold text-dark-600">নূরী <span className="text-brand">ফ্যাশন</span></span>
+              <span className="font-display text-lg font-bold text-dark-600">Noori <span className="text-brand">Fashion</span></span>
               <button onClick={toggleMenu} className="p-1">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
               </button>
             </div>
             <nav className="py-2">
-              <Link href="/" onClick={toggleMenu} className="block px-4 py-3 text-sm font-medium hover:bg-brand-50 hover:text-brand transition-colors border-b border-dark-50">হোম</Link>
+              <Link href="/" onClick={toggleMenu} className="block px-4 py-3 text-sm font-medium hover:bg-brand-50 hover:text-brand transition-colors border-b border-dark-50">Home</Link>
               {categories.map((cat) => (
                 <Link
                   key={cat.id}
@@ -127,15 +133,15 @@ export default function Header({ categories }: { categories: Category[] }) {
                 </Link>
               ))}
               <Link href="/track-order" onClick={toggleMenu} className="block px-4 py-3 text-sm font-medium hover:bg-brand-50 hover:text-brand transition-colors border-b border-dark-50">
-                অর্ডার ট্র্যাক
+                Track Order
               </Link>
               {user ? (
                 <Link href="/account" onClick={toggleMenu} className="block px-4 py-3 text-sm font-medium hover:bg-brand-50 hover:text-brand transition-colors">
-                  আমার অ্যাকাউন্ট
+                  My Account
                 </Link>
               ) : (
                 <Link href="/login" onClick={toggleMenu} className="block px-4 py-3 text-sm font-medium hover:bg-brand-50 hover:text-brand transition-colors">
-                  লগইন / রেজিস্টার
+                  Login / Register
                 </Link>
               )}
             </nav>

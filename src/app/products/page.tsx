@@ -31,7 +31,7 @@ export default async function ProductsPage({ searchParams }: { searchParams: { f
     .eq('is_active', true)
     .order('sort_order');
 
-  const title = searchParams.featured === 'true' ? 'ফিচার্ড কালেকশন' : searchParams.new === 'true' ? 'নতুন কালেকশন' : 'সকল প্রোডাক্ট';
+  const title = searchParams.featured === 'true' ? 'Featured Collection' : searchParams.new === 'true' ? 'New Arrivals' : 'All Products';
 
   return <ProductsClient products={products || []} categories={categories || []} title={title} />;
 }

@@ -26,10 +26,10 @@ export default function HomeClient({ categories, featured, newArrivals, banners 
         title: b.title || '',
         subtitle: b.subtitle || '',
         cta: b.link || '/category/exclusive',
-        ctaText: 'কালেকশন দেখুন',
+        ctaText: 'View Collection',
       }))
     : [
-        { image: '/banner-1.jpg', title: 'এক্সক্লুসিভ কালেকশন', subtitle: 'প্রিমিয়াম ইন্ডিয়ান বুটিক ড্রেস', cta: '/category/exclusive', ctaText: 'কালেকশন দেখুন' },
+        { image: '/banner-1.jpg', title: 'Exclusive Collection', subtitle: 'Premium Indian Boutique Dresses', cta: '/category/exclusive', ctaText: 'View Collection' },
       ];
 
   const nextSlide = useCallback(() => {
@@ -85,7 +85,7 @@ export default function HomeClient({ categories, featured, newArrivals, banners 
                     style={{ animation: idx === currentSlide ? 'slideInUp 0.6s ease-out 0.3s forwards' : 'none', opacity: idx === currentSlide ? undefined : 0 }}
                   >
                     <Link href={slide.cta} className="btn-primary">{slide.ctaText}</Link>
-                    <Link href="/products" className="btn-outline border-white text-white hover:bg-white hover:text-dark-600">সব দেখুন</Link>
+                    <Link href="/products" className="btn-outline border-white text-white hover:bg-white hover:text-dark-600">See All</Link>
                   </div>
                 </div>
               </div>
@@ -130,8 +130,8 @@ export default function HomeClient({ categories, featured, newArrivals, banners 
 
       {/* Category Grid */}
       <section className="max-w-7xl mx-auto px-4 py-12 md:py-16">
-        <h2 className="section-title">আমাদের কালেকশন</h2>
-        <p className="text-center text-dark-400 text-sm mb-8">সেরা ক্যাটাগরি থেকে বেছে নিন</p>
+        <h2 className="section-title">Our Collection</h2>
+        <p className="text-center text-dark-400 text-sm mb-8">Browse our finest categories</p>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 md:gap-4">
           {categories.map((cat, idx) => {
             const bgImages = ['/banner-1.jpg', '/banner-2.jpg', '/banner-3.jpg', '/banner-1.jpg', '/banner-2.jpg'];
@@ -152,7 +152,7 @@ export default function HomeClient({ categories, featured, newArrivals, banners 
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent z-10" />
                 <div className="absolute bottom-0 left-0 right-0 p-4 z-20">
                   <h3 className="text-white font-display font-semibold text-lg">{cat.name_bn || cat.name}</h3>
-                  <p className="text-white/70 text-xs mt-1 group-hover:text-brand transition-colors">কালেকশন দেখুন →</p>
+                  <p className="text-white/70 text-xs mt-1 group-hover:text-brand transition-colors">View Collection →</p>
                 </div>
               </Link>
             );
@@ -165,11 +165,11 @@ export default function HomeClient({ categories, featured, newArrivals, banners 
         <section className="max-w-7xl mx-auto px-4 py-8 md:py-12">
           <div className="flex items-center justify-between mb-8">
             <div>
-              <h2 className="font-display text-2xl md:text-3xl font-semibold">ফিচার্ড কালেকশন</h2>
-              <p className="text-dark-400 text-sm mt-1">আমাদের সেরা পছন্দের প্রোডাক্ট</p>
+              <h2 className="font-display text-2xl md:text-3xl font-semibold">Featured Collection</h2>
+              <p className="text-dark-400 text-sm mt-1">Our top picks for you</p>
             </div>
             <Link href="/products?featured=true" className="text-sm text-brand font-medium hover:underline hidden md:block">
-              সব দেখুন →
+              See All →
             </Link>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
@@ -189,30 +189,30 @@ export default function HomeClient({ categories, featured, newArrivals, banners 
             <div className="max-w-md">
               <p className="text-brand text-xs md:text-sm uppercase tracking-widest mb-2 font-medium">Special Offer</p>
               <h2 className="font-display text-3xl md:text-4xl font-bold text-white leading-tight mb-3">
-                ৳{settings.free_shipping_min.toLocaleString('en-BD')}+ অর্ডারে <span className="text-brand">ফ্রি ডেলিভারি</span>
+                <span className="text-brand">Free Delivery</span> on orders ৳{settings.free_shipping_min.toLocaleString('en-BD')}+
               </h2>
-              <p className="text-white/70 text-sm md:text-base mb-6">সারা বাংলাদেশে ডেলিভারি। ক্যাশ অন ডেলিভারি, বিকাশ, নগদ — যেকোনো মাধ্যমে পেমেন্ট করুন।</p>
+              <p className="text-white/70 text-sm md:text-base mb-6">Delivery across Bangladesh. Pay via Cash on Delivery, bKash, Nagad — any method you prefer.</p>
               <div className="flex gap-3 flex-wrap">
-                <Link href="/products" className="btn-primary text-sm">শপিং শুরু করুন</Link>
+                <Link href="/products" className="btn-primary text-sm">Start Shopping</Link>
               </div>
               <div className="flex gap-6 mt-8">
                 <div className="text-center">
                   <div className="w-11 h-11 border border-brand/50 rounded-full flex items-center justify-center mb-1.5">
                     <svg className="w-5 h-5 text-brand" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" /></svg>
                   </div>
-                  <p className="text-white text-[10px] md:text-xs">ফ্রি ডেলিভারি</p>
+                  <p className="text-white text-[10px] md:text-xs">Free Delivery</p>
                 </div>
                 <div className="text-center">
                   <div className="w-11 h-11 border border-brand/50 rounded-full flex items-center justify-center mb-1.5">
                     <svg className="w-5 h-5 text-brand" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
                   </div>
-                  <p className="text-white text-[10px] md:text-xs">অরিজিনাল</p>
+                  <p className="text-white text-[10px] md:text-xs">Original</p>
                 </div>
                 <div className="text-center">
                   <div className="w-11 h-11 border border-brand/50 rounded-full flex items-center justify-center mb-1.5">
                     <svg className="w-5 h-5 text-brand" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg>
                   </div>
-                  <p className="text-white text-[10px] md:text-xs">সহজ পেমেন্ট</p>
+                  <p className="text-white text-[10px] md:text-xs">Easy Payment</p>
                 </div>
               </div>
             </div>
@@ -225,11 +225,11 @@ export default function HomeClient({ categories, featured, newArrivals, banners 
         <section className="max-w-7xl mx-auto px-4 py-12 md:py-16">
           <div className="flex items-center justify-between mb-8">
             <div>
-              <h2 className="font-display text-2xl md:text-3xl font-semibold">নতুন কালেকশন</h2>
-              <p className="text-dark-400 text-sm mt-1">সর্বশেষ সংযোজিত প্রোডাক্ট</p>
+              <h2 className="font-display text-2xl md:text-3xl font-semibold">New Arrivals</h2>
+              <p className="text-dark-400 text-sm mt-1">Latest additions to our store</p>
             </div>
             <Link href="/products?new=true" className="text-sm text-brand font-medium hover:underline hidden md:block">
-              সব দেখুন →
+              See All →
             </Link>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
@@ -247,13 +247,13 @@ export default function HomeClient({ categories, featured, newArrivals, banners 
           <div className="absolute inset-0 bg-black/75 backdrop-blur-[2px]" />
         </div>
         <div className="relative max-w-4xl mx-auto px-4 text-center z-10">
-          <h2 className="font-display text-2xl md:text-3xl font-semibold text-white mb-4">নূরী ফ্যাশন কেন বেছে নেবেন?</h2>
+          <h2 className="font-display text-2xl md:text-3xl font-semibold text-white mb-4">Why Choose Noori Fashion?</h2>
           <p className="text-white/80 text-sm md:text-base leading-relaxed mb-8">
-            নূরী ফ্যাশন বাংলাদেশের অন্যতম প্রিমিয়াম মহিলা ফ্যাশন ব্র্যান্ড। আমরা এক্সক্লুসিভ ইন্ডিয়ান বুটিক কালেকশন,
-            প্রিমিয়াম স্টিচ ও আনস্টিচ ড্রেস, ট্রেন্ডি প্লাজো সেট, এবং এলিগ্যান্ট কো-অর্ড সেট অফার করি।
-            প্রতিটি প্রোডাক্ট যত্নসহকারে নির্বাচিত এবং সর্বোচ্চ মানের নিশ্চয়তা দেওয়া হয়।
+            Noori Fashion is one of Bangladesh&apos;s leading premium women&apos;s fashion brands. We offer exclusive Indian boutique collections,
+            premium stitched and unstitched dresses, trendy plazo sets, and elegant co-ord sets.
+            Every product is carefully curated with the highest quality assurance.
           </p>
-          <Link href="/products" className="btn-primary inline-block">কালেকশন ব্রাউজ করুন</Link>
+          <Link href="/products" className="btn-primary inline-block">Browse Collection</Link>
         </div>
       </section>
     </>

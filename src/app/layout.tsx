@@ -13,11 +13,11 @@ import { createClient } from '@supabase/supabase-js';
 export const revalidate = 60;
 
 export const metadata: Metadata = {
-  title: 'নূরী ফ্যাশন | Noori Fashion - Premium Women\'s Fashion',
-  description: 'নূরী ফ্যাশন — বাংলাদেশের প্রিমিয়াম মহিলা ফ্যাশন ব্র্যান্ড। এক্সক্লুসিভ, স্টিচ, আনস্টিচ, প্লাজো সেট ও কো-অর্ড সেট কালেকশন।',
+  title: 'Noori Fashion - Premium Women\'s Fashion',
+  description: 'Noori Fashion — Bangladesh\'s premium women\'s fashion brand. Exclusive, stitched, unstitched, plazo set and co-ord set collections.',
   icons: { icon: '/favicon.ico' },
   openGraph: {
-    title: 'নূরী ফ্যাশন | Noori Fashion',
+    title: 'Noori Fashion',
     description: 'Premium Women\'s Fashion Collection',
     url: 'https://noori.diptait.com.bd',
     siteName: 'Noori Fashion',

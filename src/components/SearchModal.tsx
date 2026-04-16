@@ -59,7 +59,7 @@ export default function SearchModal() {
               ref={inputRef}
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="প্রোডাক্ট খুঁজুন..."
+              placeholder="Search products..."
               className="flex-1 px-3 py-4 text-sm outline-none"
             />
             <button onClick={toggleSearch} className="p-1 text-dark-400 hover:text-dark-600">
@@ -69,7 +69,7 @@ export default function SearchModal() {
           {(results.length > 0 || loading) && (
             <div className="max-h-96 overflow-y-auto p-4">
               {loading ? (
-                <div className="text-center py-8 text-dark-400 text-sm">খুঁজছি...</div>
+                <div className="text-center py-8 text-dark-400 text-sm">Searching...</div>
               ) : (
                 <div className="space-y-3">
                   {results.map((p) => (
@@ -88,7 +88,7 @@ export default function SearchModal() {
             </div>
           )}
           {query.length >= 2 && !loading && results.length === 0 && (
-            <div className="text-center py-8 text-dark-400 text-sm">কোনো প্রোডাক্ট পাওয়া যায়নি</div>
+            <div className="text-center py-8 text-dark-400 text-sm">No products found</div>
           )}
         </div>
       </div>

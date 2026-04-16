@@ -18,16 +18,16 @@ export default function CartPage() {
     return (
       <div className="max-w-7xl mx-auto px-4 py-20 text-center">
         <svg className="w-20 h-20 mx-auto text-dark-200 mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
-        <h1 className="font-display text-2xl font-semibold mb-2">আপনার কার্ট খালি</h1>
-        <p className="text-dark-400 mb-6">শপিং শুরু করতে প্রোডাক্ট যোগ করুন</p>
-        <Link href="/" className="btn-primary inline-block">শপিং শুরু করুন</Link>
+        <h1 className="font-display text-2xl font-semibold mb-2">Your Cart is Empty</h1>
+        <p className="text-dark-400 mb-6">Add products to start shopping</p>
+        <Link href="/" className="btn-primary inline-block">Start Shopping</Link>
       </div>
     );
   }
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
-      <h1 className="font-display text-2xl md:text-3xl font-semibold mb-8">শপিং কার্ট</h1>
+      <h1 className="font-display text-2xl md:text-3xl font-semibold mb-8">Shopping Cart</h1>
       <div className="grid lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-4">
           {items.map((item, idx) => (
@@ -37,7 +37,7 @@ export default function CartPage() {
               </div>
               <div className="flex-1 min-w-0">
                 <Link href={`/product/${item.product.slug}`} className="font-medium text-sm md:text-base hover:text-brand transition-colors line-clamp-2">{item.product.name}</Link>
-                {item.selectedSize && <p className="text-xs text-dark-400 mt-1">সাইজ: {item.selectedSize}</p>}
+                {item.selectedSize && <p className="text-xs text-dark-400 mt-1">Size: {item.selectedSize}</p>}
                 <p className="text-brand font-semibold mt-2">{formatPrice((item.variant?.price_override != null && item.variant.price_override > 0) ? item.variant.price_override : item.product.price)}</p>
                 <div className="flex items-center justify-between mt-3">
                   <div className="flex items-center border border-dark-200">
@@ -55,20 +55,20 @@ export default function CartPage() {
               </div>
             </div>
           ))}
-          <button onClick={clearCart} className="text-sm text-red-500 hover:underline">কার্ট খালি করুন</button>
+          <button onClick={clearCart} className="text-sm text-red-500 hover:underline">Clear Cart</button>
         </div>
 
         {/* Summary */}
         <div className="lg:col-span-1">
           <div className="bg-dark-50 p-6 sticky top-24">
-            <h2 className="font-display text-lg font-semibold mb-4">অর্ডার সামারি</h2>
+            <h2 className="font-display text-lg font-semibold mb-4">Order Summary</h2>
             <div className="space-y-3 text-sm">
-              <div className="flex justify-between"><span>সাবটোটাল ({items.length} আইটেম)</span><span className="font-medium">{formatPrice(getTotal())}</span></div>
-              <div className="flex justify-between text-dark-400"><span>শিপিং</span><span>চেকআউটে যোগ হবে</span></div>
-              <div className="border-t border-dark-200 pt-3 flex justify-between text-base font-bold"><span>মোট</span><span className="text-brand">{formatPrice(getTotal())}</span></div>
+              <div className="flex justify-between"><span>Subtotal ({items.length} items)</span><span className="font-medium">{formatPrice(getTotal())}</span></div>
+              <div className="flex justify-between text-dark-400"><span>Shipping</span><span>Calculated at checkout</span></div>
+              <div className="border-t border-dark-200 pt-3 flex justify-between text-base font-bold"><span>Total</span><span className="text-brand">{formatPrice(getTotal())}</span></div>
             </div>
-            <Link href="/checkout" className="btn-primary w-full text-center block mt-5">চেকআউটে যান</Link>
-            <Link href="/" className="block text-center text-sm text-brand mt-3 hover:underline">আরো শপিং করুন</Link>
+            <Link href="/checkout" className="btn-primary w-full text-center block mt-5">Proceed to Checkout</Link>
+            <Link href="/" className="block text-center text-sm text-brand mt-3 hover:underline">Continue Shopping</Link>
           </div>
         </div>
       </div>

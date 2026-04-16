@@ -34,21 +34,21 @@ function TrackOrderContent() {
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-12">
-      <h1 className="font-display text-2xl font-semibold text-center mb-8">অর্ডার ট্র্যাক করুন</h1>
+      <h1 className="font-display text-2xl font-semibold text-center mb-8">Track Your Order</h1>
       <div className="flex gap-2 mb-8">
-        <input value={query} onChange={(e) => setQuery(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handleSearch()} className="input-field flex-1" placeholder="অর্ডার নম্বর বা মোবাইল নম্বর" />
-        <button onClick={() => handleSearch()} disabled={loading} className="btn-primary px-6 text-sm">{loading ? '...' : 'খুঁজুন'}</button>
+        <input value={query} onChange={(e) => setQuery(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handleSearch()} className="input-field flex-1" placeholder="Order number or mobile number" />
+        <button onClick={() => handleSearch()} disabled={loading} className="btn-primary px-6 text-sm">{loading ? '...' : 'Search'}</button>
       </div>
 
       {searched && !loading && !order && (
-        <p className="text-center text-dark-400 py-8">কোনো অর্ডার পাওয়া যায়নি</p>
+        <p className="text-center text-dark-400 py-8">No order found</p>
       )}
 
       {order && (
         <div className="animate-fade-in">
           {searchParams.get('order') && (
             <div className="bg-green-50 border border-green-200 p-4 mb-6 text-center">
-              <p className="text-green-800 font-medium">✓ আপনার অর্ডার সফলভাবে প্লেস হয়েছে!</p>
+              <p className="text-green-800 font-medium">Your order has been placed successfully!</p>
             </div>
           )}
 
@@ -56,7 +56,7 @@ function TrackOrderContent() {
             <div className="flex justify-between items-start mb-4">
               <div>
                 <h2 className="font-semibold">{order.order_number}</h2>
-                <p className="text-xs text-dark-400">{new Date(order.created_at).toLocaleString('bn-BD')}</p>
+                <p className="text-xs text-dark-400">{new Date(order.created_at).toLocaleString('en-BD')}</p>
               </div>
               <span className={`text-xs px-3 py-1 ${getStatusColor(order.order_status)}`}>{getStatusLabel(order.order_status)}</span>
             </div>
@@ -78,13 +78,13 @@ function TrackOrderContent() {
             )}
 
             <div className="grid md:grid-cols-2 gap-4 text-sm">
-              <div><span className="text-dark-400">নাম:</span> <span className="font-medium">{order.customer_name}</span></div>
-              <div><span className="text-dark-400">পেমেন্ট:</span> <span className="font-medium">{getStatusLabel(order.payment_method)}</span> — <span className={getStatusColor(order.payment_status)}>{getStatusLabel(order.payment_status)}</span></div>
+              <div><span className="text-dark-400">Name:</span> <span className="font-medium">{order.customer_name}</span></div>
+              <div><span className="text-dark-400">Payment:</span> <span className="font-medium">{getStatusLabel(order.payment_method)}</span> — <span className={getStatusColor(order.payment_status)}>{getStatusLabel(order.payment_status)}</span></div>
             </div>
           </div>
 
           <div className="border border-dark-100 p-5">
-            <h3 className="font-semibold mb-3">অর্ডার আইটেম</h3>
+            <h3 className="font-semibold mb-3">Order Items</h3>
             {order.nf_order_items?.map((item: any, idx: number) => (
               <div key={idx} className="flex justify-between py-2 border-b border-dark-50 text-sm last:border-0">
                 <span>{item.product_name} {item.variant_size ? `(${item.variant_size})` : ''} × {item.quantity}</span>
@@ -92,9 +92,9 @@ function TrackOrderContent() {
               </div>
             ))}
             <div className="mt-3 pt-3 border-t text-sm space-y-1">
-              <div className="flex justify-between"><span>সাবটোটাল</span><span>{formatPrice(order.subtotal)}</span></div>
-              <div className="flex justify-between"><span>শিপিং</span><span>{order.shipping_cost === 0 ? 'ফ্রি' : formatPrice(order.shipping_cost)}</span></div>
-              <div className="flex justify-between font-bold text-base pt-2 border-t"><span>মোট</span><span className="text-brand">{formatPrice(order.total)}</span></div>
+              <div className="flex justify-between"><span>Subtotal</span><span>{formatPrice(order.subtotal)}</span></div>
+              <div className="flex justify-between"><span>Shipping</span><span>{order.shipping_cost === 0 ? 'Free' : formatPrice(order.shipping_cost)}</span></div>
+              <div className="flex justify-between font-bold text-base pt-2 border-t"><span>Total</span><span className="text-brand">{formatPrice(order.total)}</span></div>
             </div>
           </div>
         </div>
@@ -105,7 +105,7 @@ function TrackOrderContent() {
 
 export default function TrackOrderPage() {
   return (
-    <Suspense fallback={<div className="max-w-2xl mx-auto px-4 py-12 text-center">লোড হচ্ছে...</div>}>
+    <Suspense fallback={<div className="max-w-2xl mx-auto px-4 py-12 text-center">Loading...</div>}>
       <TrackOrderContent />
     </Suspense>
   );

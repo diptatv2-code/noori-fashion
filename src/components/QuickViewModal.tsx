@@ -56,11 +56,11 @@ export default function QuickViewModal() {
               )}
             </div>
             {product.description && <p className="text-sm text-dark-400 mb-4 line-clamp-2">{product.description}</p>}
-            {product.fabric_type && <p className="text-xs text-dark-400 mb-4">কাপড়: {product.fabric_type}</p>}
+            {product.fabric_type && <p className="text-xs text-dark-400 mb-4">Fabric: {product.fabric_type}</p>}
 
             {sizes.length > 0 && (
               <div className="mb-4">
-                <p className="text-xs font-semibold uppercase tracking-wider mb-2">সাইজ</p>
+                <p className="text-xs font-semibold uppercase tracking-wider mb-2">Size</p>
                 <div className="flex flex-wrap gap-2">
                   {sizes.map((s) => (
                     <button
@@ -82,11 +82,11 @@ export default function QuickViewModal() {
                 <button onClick={() => setQty(qty + 1)} className="w-9 h-9 flex items-center justify-center hover:bg-dark-50">+</button>
               </div>
               <button onClick={handleAdd} className="flex-1 btn-primary text-sm py-2.5">
-                ব্যাগে যোগ করুন
+                Add to Bag
               </button>
             </div>
             <Link href={`/product/${product.slug}`} onClick={() => setQuickView(null)} className="block text-center text-sm text-brand hover:underline">
-              সম্পূর্ণ বিবরণ দেখুন →
+              View Full Details →
             </Link>
           </div>
         </div>

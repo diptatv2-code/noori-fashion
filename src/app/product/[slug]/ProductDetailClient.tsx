@@ -23,7 +23,6 @@ export default function ProductDetailClient({ product, related }: { product: Pro
   const addItem = useCartStore((s) => s.addItem);
   const setCartOpen = useCartStore((s) => s.setCartOpen);
 
-  // Determine the active price based on selected variant's price_override
   const activePrice = useMemo(() => {
     if (selectedSize) {
       const variant = variants.find((v) => v.size === selectedSize);
@@ -54,11 +53,11 @@ export default function ProductDetailClient({ product, related }: { product: Pro
       {/* Breadcrumb */}
       <div className="bg-dark-50 py-3">
         <div className="max-w-7xl mx-auto px-4 flex items-center gap-2 text-sm text-dark-400">
-          <Link href="/" className="hover:text-brand">হোম</Link>
+          <Link href="/" className="hover:text-brand">Home</Link>
           <span>/</span>
           {product.nf_categories && (
             <>
-              <Link href={`/category/${product.nf_categories.slug}`} className="hover:text-brand">{product.nf_categories.name_bn || product.nf_categories.name}</Link>
+              <Link href={`/category/${product.nf_categories.slug}`} className="hover:text-brand">{product.nf_categories.name}</Link>
               <span>/</span>
             </>
           )}
@@ -73,7 +72,7 @@ export default function ProductDetailClient({ product, related }: { product: Pro
             <div className="aspect-[3/4] relative bg-dark-50 overflow-hidden mb-3">
               <Image src={mainImg} alt={product.name} fill className="object-cover" sizes="(max-width: 768px) 100vw, 50vw" priority />
               {discount > 0 && <span className="badge-sale">-{discount}%</span>}
-              {product.is_new && <span className="badge-new">নতুন</span>}
+              {product.is_new && <span className="badge-new">New</span>}
             </div>
             {images.length > 1 && (
               <div className="grid grid-cols-5 gap-2">
@@ -93,7 +92,7 @@ export default function ProductDetailClient({ product, related }: { product: Pro
           {/* Details */}
           <div>
             {product.nf_categories && (
-              <p className="text-xs uppercase tracking-wider text-dark-400 mb-2">{product.nf_categories.name_bn || product.nf_categories.name}</p>
+              <p className="text-xs uppercase tracking-wider text-dark-400 mb-2">{product.nf_categories.name}</p>
             )}
             <h1 className="font-display text-2xl md:text-3xl font-semibold mb-3">{product.name}</h1>
 
@@ -102,7 +101,7 @@ export default function ProductDetailClient({ product, related }: { product: Pro
               {product.compare_price && product.compare_price > activePrice && (
                 <>
                   <span className="text-base text-dark-300 line-through">{formatPrice(product.compare_price)}</span>
-                  <span className="text-xs bg-red-100 text-red-700 px-2 py-0.5 font-medium">-{getDiscount(activePrice, product.compare_price)}% ছাড়</span>
+                  <span className="text-xs bg-red-100 text-red-700 px-2 py-0.5 font-medium">-{getDiscount(activePrice, product.compare_price)}% OFF</span>
                 </>
               )}
             </div>
@@ -113,7 +112,7 @@ export default function ProductDetailClient({ product, related }: { product: Pro
 
             {product.fabric_type && (
               <div className="mb-4 text-sm">
-                <span className="text-dark-400">কাপড়ের ধরন:</span>
+                <span className="text-dark-400">Fabric Type:</span>
                 <span className="ml-2 font-medium">{product.fabric_type}</span>
               </div>
             )}
@@ -121,7 +120,7 @@ export default function ProductDetailClient({ product, related }: { product: Pro
             {/* Size Selector */}
             {sizes.length > 0 && (
               <div className="mb-5">
-                <p className="text-sm font-semibold mb-2">সাইজ নির্বাচন করুন</p>
+                <p className="text-sm font-semibold mb-2">Select Size</p>
                 <div className="flex flex-wrap gap-2">
                   {sizes.map((s) => {
                     const v = variants.find((v) => v.size === s);
@@ -142,7 +141,7 @@ export default function ProductDetailClient({ product, related }: { product: Pro
                   })}
                 </div>
                 {sizes.length > 0 && !selectedSize && (
-                  <p className="text-xs text-red-500 mt-1">অনুগ্রহ করে সাইজ সিলেক্ট করুন</p>
+                  <p className="text-xs text-red-500 mt-1">Please select a size</p>
                 )}
               </div>
             )}
@@ -158,10 +157,10 @@ export default function ProductDetailClient({ product, related }: { product: Pro
 
             <div className="grid grid-cols-2 gap-3 mb-6">
               <button onClick={handleAdd} className={`btn-outline text-sm py-3 ${added ? 'bg-green-600 text-white border-green-600' : ''}`}>
-                {added ? '✓ যোগ হয়েছে' : 'ব্যাগে যোগ করুন'}
+                {added ? '✓ Added' : 'Add to Bag'}
               </button>
               <button onClick={handleBuyNow} className="btn-primary text-sm py-3">
-                এখনই কিনুন
+                Buy Now
               </button>
             </div>
 
@@ -169,15 +168,15 @@ export default function ProductDetailClient({ product, related }: { product: Pro
             <div className="space-y-3 text-sm border-t border-dark-100 pt-5">
               <div className="flex items-center gap-2 text-dark-500">
                 <svg className="w-4 h-4 text-brand shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" /></svg>
-                ঢাকায় {formatPrice(settings.shipping_dhaka)} | ঢাকার বাইরে {formatPrice(settings.shipping_outside)} | {formatPrice(settings.free_shipping_min)}+ অর্ডারে ফ্রি
+                Dhaka: {formatPrice(settings.shipping_dhaka)} | Outside Dhaka: {formatPrice(settings.shipping_outside)} | Free on {formatPrice(settings.free_shipping_min)}+ orders
               </div>
               <div className="flex items-center gap-2 text-dark-500">
                 <svg className="w-4 h-4 text-brand shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg>
-                ক্যাশ অন ডেলিভারি | বিকাশ | নগদ
+                Cash on Delivery | bKash | Nagad
               </div>
               <div className="flex items-center gap-2 text-dark-500">
                 <svg className="w-4 h-4 text-brand shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
-                ১০০% অরিজিনাল প্রোডাক্ট গ্যারান্টি
+                100% Original Product Guarantee
               </div>
             </div>
           </div>
@@ -186,7 +185,7 @@ export default function ProductDetailClient({ product, related }: { product: Pro
         {/* Related Products */}
         {related.length > 0 && (
           <section className="mt-16">
-            <h2 className="font-display text-2xl font-semibold mb-6">সম্পর্কিত প্রোডাক্ট</h2>
+            <h2 className="font-display text-2xl font-semibold mb-6">Related Products</h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
               {related.map((p) => (
                 <ProductCard key={p.id} product={p} />
