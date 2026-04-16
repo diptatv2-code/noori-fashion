@@ -64,7 +64,12 @@ export const useCartStore = create<CartStore>()(
       clearCart: () => set({ items: [] }),
       toggleCart: () => set((state) => ({ isCartOpen: !state.isCartOpen })),
       setCartOpen: (open) => set({ isCartOpen: open }),
-      getTotal: () => get().items.reduce((t, i) => t + i.product.price * i.quantity, 0),
+      getTotal: () => get().items.reduce((t, i) => {
+        const price = (i.variant?.price_override != null && i.variant.price_override > 0)
+          ? i.variant.price_override
+          : i.product.price;
+        return t + price * i.quantity;
+      }, 0),
       getItemCount: () => get().items.reduce((t, i) => t + i.quantity, 0),
     }),
     { name: 'noori-cart' }

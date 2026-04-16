@@ -1,52 +1,132 @@
-import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
+import { NextRequest, NextResponse } from 'next/server';
+import { createClient } from '@supabase/supabase-js';
 
 const supabase = createClient(
-  (process.env.NEXT_PUBLIC_SUPABASE_URL || "").trim(),
-  (process.env.SUPABASE_SERVICE_ROLE_KEY || "").trim()
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-export async function POST(req: NextRequest) {
-  console.log("=== ORDER API CALLED ===");
-  console.log("ENV: TELEGRAM_BOT_TOKEN =", process.env.TELEGRAM_BOT_TOKEN ? "SET" : "MISSING");
-  console.log("ENV: TELEGRAM_CHAT_ID =", process.env.TELEGRAM_CHAT_ID ? "SET" : "MISSING");
-  console.log("ENV: RESEND_API_KEY =", process.env.RESEND_API_KEY ? "SET" : "MISSING");
+function sanitize(str: string, maxLen: number): string {
+  return String(str || '').trim().slice(0, maxLen).replace(/[<>]/g, '');
+}
 
+function escapeHtml(str: string): string {
+  return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     const { items, ...orderData } = body;
 
     if (!items || items.length === 0) {
-      return NextResponse.json({ error: "Cart is empty" }, { status: 400 });
+      return NextResponse.json({ error: 'কার্ট খালি' }, { status: 400 });
     }
 
+    // Input validation (Issue #27)
+    const customerName = sanitize(orderData.customer_name, 100);
+    const customerPhone = sanitize(orderData.customer_phone, 20);
+    const customerEmail = sanitize(orderData.customer_email || '', 100);
+    const shippingAddress = sanitize(orderData.shipping_address, 500);
+    const shippingCity = sanitize(orderData.shipping_city, 50);
+    const shippingArea = sanitize(orderData.shipping_area || '', 100);
+    const notes = sanitize(orderData.notes || '', 1000);
+
+    if (!customerName || !customerPhone || !shippingAddress || !shippingCity) {
+      return NextResponse.json({ error: 'সব তথ্য পূরণ করুন' }, { status: 400 });
+    }
+
+    if (!/^01[0-9]{9}$/.test(customerPhone.replace(/[^0-9]/g, '').replace(/^880/, '').replace(/^\+880/, ''))) {
+      return NextResponse.json({ error: 'সঠিক মোবাইল নম্বর দিন' }, { status: 400 });
+    }
+
+    // Fetch settings for shipping calculation
+    const { data: settingsRows } = await supabase.from('nf_settings').select('key, value');
+    const settings: Record<string, string> = {};
+    (settingsRows || []).forEach((r: any) => { if (r.value) settings[r.key] = r.value; });
+    const shippingDhaka = parseInt(settings.shipping_dhaka) || 80;
+    const shippingOutside = parseInt(settings.shipping_outside) || 150;
+    const freeShippingMin = parseInt(settings.free_shipping_min) || 5000;
+    const ownerEmail = settings.email || 'Noori330332@gmail.com';
+
+    // Server-side price verification (Issue #17)
+    const productIds = [...new Set(items.map((i: any) => i.product_id))];
+    const { data: products } = await supabase
+      .from('nf_products')
+      .select('id, price, nf_product_variants(id, size, stock, price_override)')
+      .in('id', productIds);
+
+    const productMap = new Map((products || []).map((p: any) => [p.id, p]));
+
+    // Validate stock and compute server-side totals
+    let computedSubtotal = 0;
+    const verifiedItems: any[] = [];
+
+    for (const item of items) {
+      const product = productMap.get(item.product_id);
+      if (!product) {
+        return NextResponse.json({ error: `প্রোডাক্ট পাওয়া যায়নি` }, { status: 400 });
+      }
+
+      const variant = item.variant_size
+        ? (product.nf_product_variants || []).find((v: any) => v.size === item.variant_size)
+        : null;
+
+      // Stock validation (Issue #1)
+      if (variant && variant.stock < item.quantity) {
+        return NextResponse.json({
+          error: `${item.product_name} (${item.variant_size}) স্টকে নেই। বাকি আছে: ${variant.stock}`,
+        }, { status: 400 });
+      }
+
+      // Use price_override if exists (Issue #11)
+      const unitPrice = (variant?.price_override != null && variant.price_override > 0)
+        ? parseFloat(variant.price_override)
+        : parseFloat(product.price);
+      const itemTotal = unitPrice * item.quantity;
+      computedSubtotal += itemTotal;
+
+      verifiedItems.push({
+        ...item,
+        unit_price: unitPrice,
+        total_price: itemTotal,
+        variant_id: variant?.id || null,
+      });
+    }
+
+    // Compute shipping server-side
+    const computedShipping = computedSubtotal >= freeShippingMin ? 0 : shippingCity === 'ঢাকা' ? shippingDhaka : shippingOutside;
+    const computedTotal = computedSubtotal + computedShipping;
+
+    // Insert order with server-computed totals
     const { data: order, error: orderError } = await supabase
-      .from("nf_orders")
+      .from('nf_orders')
       .insert({
-        user_id: orderData.user_id,
-        customer_name: orderData.customer_name,
-        customer_email: orderData.customer_email,
-        customer_phone: orderData.customer_phone,
-        shipping_address: orderData.shipping_address,
-        shipping_city: orderData.shipping_city,
-        shipping_area: orderData.shipping_area,
-        subtotal: orderData.subtotal,
-        shipping_cost: orderData.shipping_cost,
+        user_id: orderData.user_id || null,
+        customer_name: customerName,
+        customer_email: customerEmail || null,
+        customer_phone: customerPhone,
+        shipping_address: shippingAddress,
+        shipping_city: shippingCity,
+        shipping_area: shippingArea || null,
+        subtotal: computedSubtotal,
+        shipping_cost: computedShipping,
         discount: 0,
-        total: orderData.total,
+        total: computedTotal,
         payment_method: orderData.payment_method,
-        transaction_id: orderData.transaction_id,
-        notes: orderData.notes,
+        transaction_id: sanitize(orderData.transaction_id || '', 100) || null,
+        notes: notes || null,
       })
       .select()
       .single();
 
     if (orderError) throw orderError;
 
-    const orderItems = items.map((item: any) => ({
+    // Insert order items
+    const orderItems = verifiedItems.map((item: any) => ({
       order_id: order.id,
       product_id: item.product_id,
-      product_name: item.product_name,
+      product_name: sanitize(item.product_name, 200),
       product_image: item.product_image,
       variant_size: item.variant_size,
       variant_color: item.variant_color,
@@ -55,142 +135,123 @@ export async function POST(req: NextRequest) {
       total_price: item.total_price,
     }));
 
-    await supabase.from("nf_order_items").insert(orderItems);
+    await supabase.from('nf_order_items').insert(orderItems);
 
-    // MUST await — Vercel kills serverless function after response is sent
-    await Promise.allSettled([
-      sendTelegram(order, items),
-      sendEmails(order, items),
-    ]);
+    // Stock decrement (Issue #1)
+    for (const item of verifiedItems) {
+      if (item.variant_id) {
+        await supabase.rpc('nf_decrement_stock', {
+          p_variant_id: item.variant_id,
+          p_product_id: item.product_id,
+          p_quantity: item.quantity,
+        });
+      }
+    }
+
+    // Send Telegram notification
+    sendTelegram(order, verifiedItems).catch(console.error);
+
+    // Send email notification
+    sendEmail(order, verifiedItems, ownerEmail).catch(console.error);
 
     return NextResponse.json({ order_number: order.order_number, order_id: order.id });
   } catch (err: any) {
-    console.error("Order error:", err);
-    return NextResponse.json({ error: err.message || "Failed to place order" }, { status: 500 });
-  }
-}
-
-function formatPayment(method: string, total: number): string {
-  const half = Math.ceil(total / 2);
-  switch (method) {
-    case "cod": return "Cash on Delivery";
-    case "bkash": return `bKash Full Payment (${total} paid)`;
-    case "bkash_50_advance": return `bKash 50% Advance (${half} paid, ${total - half} due on delivery)`;
-    case "bkash_100_advance": return `bKash 100% Advance (${total} paid)`;
-    default: return method;
+    console.error('Order error:', err);
+    return NextResponse.json({ error: err.message || 'অর্ডার করতে সমস্যা হয়েছে' }, { status: 500 });
   }
 }
 
 async function sendTelegram(order: any, items: any[]) {
   const token = process.env.TELEGRAM_BOT_TOKEN;
   const chatId = process.env.TELEGRAM_CHAT_ID;
-  console.log("TELEGRAM: token =", token ? "SET" : "MISSING", "chatId =", chatId ? "SET" : "MISSING");
   if (!token || !chatId) return;
 
-  const lines: string[] = [];
-  items.forEach((i: any) => {
-    const sz = i.variant_size ? ` (${i.variant_size})` : "";
-    lines.push(`  - ${i.product_name}${sz} x ${i.quantity}`);
+  const paymentLabels: Record<string, string> = {
+    cod: 'ক্যাশ অন ডেলিভারি', bkash: 'বিকাশ', nagad: 'নগদ',
+    bkash_50_advance: 'বিকাশ (৫০% অ্যাডভান্স)', bkash_100_advance: 'বিকাশ (১০০% অ্যাডভান্স)',
+  };
+
+  const itemsList = items.map((i: any) => `  • ${i.product_name}${i.variant_size ? ` (${i.variant_size})` : ''} × ${i.quantity} = ৳${i.total_price}`).join('\n');
+
+  const msg = `🛍️ *নতুন অর্ডার — নূরী ফ্যাশন*
+
+📋 অর্ডার: \`${order.order_number}\`
+👤 নাম: ${order.customer_name}
+📱 ফোন: ${order.customer_phone}
+📧 ইমেইল: ${order.customer_email || 'N/A'}
+📍 ঠিকানা: ${order.shipping_address}, ${order.shipping_city}
+
+🛒 প্রোডাক্ট:
+${itemsList}
+
+💰 সাবটোটাল: ৳${order.subtotal}
+🚚 শিপিং: ৳${order.shipping_cost}
+💵 *মোট: ৳${order.total}*
+
+💳 পেমেন্ট: ${paymentLabels[order.payment_method] || order.payment_method}
+${order.transaction_id ? `🔑 TxnID: ${order.transaction_id}` : ''}
+${order.notes ? `📝 নোট: ${order.notes}` : ''}`;
+
+  await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ chat_id: chatId, text: msg, parse_mode: 'Markdown' }),
   });
-
-  const parts = [
-    `New Order - Noori Fashion`,
-    `Order: ${order.order_number}`,
-    `Name: ${order.customer_name}`,
-    `Phone: ${order.customer_phone}`,
-    `Address: ${order.shipping_address}, ${order.shipping_city}`,
-    ``,
-    `Products:`,
-    ...lines,
-    ``,
-    `Total: ${order.total}`,
-    `Payment: ${formatPayment(order.payment_method, order.total)}`,
-  ];
-  if (order.transaction_id) parts.push(`TxnID: ${order.transaction_id}`);
-
-  console.log("TELEGRAM: Sending to chat", chatId);
-  try {
-    const res = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ chat_id: chatId, text: parts.join("\n") }),
-    });
-    const data = await res.json();
-    console.log("TELEGRAM: Response", res.status, JSON.stringify(data));
-  } catch (e) {
-    console.error("TELEGRAM FAILED:", e);
-  }
 }
 
-async function sendEmails(order: any, items: any[]) {
+async function sendEmail(order: any, items: any[], ownerEmail: string) {
   const apiKey = process.env.RESEND_API_KEY;
-  if (!apiKey) { console.log("EMAIL: RESEND_API_KEY missing, skipping"); return; }
+  if (!apiKey) return;
 
-  const rows = items.map((i: any) => {
-    const sz = i.variant_size ? ` (${i.variant_size})` : "";
-    return `<tr><td style="padding:8px;border-bottom:1px solid #eee">${i.product_name}${sz}</td><td style="padding:8px;border-bottom:1px solid #eee;text-align:center">${i.quantity}</td><td style="padding:8px;border-bottom:1px solid #eee;text-align:right">${i.total_price}</td></tr>`;
-  }).join("");
+  const itemsHtml = items.map((i: any) =>
+    `<tr><td style="padding:8px;border-bottom:1px solid #eee">${escapeHtml(i.product_name)}${i.variant_size ? ` (${escapeHtml(i.variant_size)})` : ''}</td><td style="padding:8px;border-bottom:1px solid #eee;text-align:center">${i.quantity}</td><td style="padding:8px;border-bottom:1px solid #eee;text-align:right">৳${i.total_price}</td></tr>`
+  ).join('');
 
-  const html = [
-    '<div style="max-width:600px;margin:0 auto;font-family:sans-serif">',
-    '<div style="background:#1A1A1A;padding:20px;text-align:center">',
-    '<h1 style="color:#E85D24;margin:0;font-size:24px">Noori Fashion</h1></div>',
-    '<div style="padding:24px;background:#fff">',
-    '<h2 style="color:#333;margin:0 0 16px">Order Confirmation</h2>',
-    `<p>Dear ${order.customer_name},</p>`,
-    `<p>Your order has been placed successfully. Order number: <strong>${order.order_number}</strong></p>`,
-    `<p>Phone: ${order.customer_phone}</p>`,
-    `<p>Address: ${order.shipping_address}, ${order.shipping_city}</p>`,
-    `<p>Payment: ${formatPayment(order.payment_method, order.total)}${order.transaction_id ? ` (TxnID: ${order.transaction_id})` : ""}</p>`,
-    '<table style="width:100%;border-collapse:collapse;margin:16px 0">',
-    '<thead><tr style="background:#f5f5f5"><th style="padding:8px;text-align:left">Product</th><th style="padding:8px;text-align:center">Qty</th><th style="padding:8px;text-align:right">Price</th></tr></thead>',
-    `<tbody>${rows}</tbody>`,
-    '<tfoot>',
-    `<tr><td colspan="2" style="padding:8px;text-align:right">Subtotal</td><td style="padding:8px;text-align:right">${order.subtotal}</td></tr>`,
-    `<tr><td colspan="2" style="padding:8px;text-align:right">Shipping</td><td style="padding:8px;text-align:right">${order.shipping_cost}</td></tr>`,
-    `<tr style="font-weight:bold"><td colspan="2" style="padding:8px;text-align:right;border-top:2px solid #E85D24">Total</td><td style="padding:8px;text-align:right;border-top:2px solid #E85D24;color:#E85D24">${order.total}</td></tr>`,
-    '</tfoot></table>',
-    '<p style="color:#666;font-size:14px">Thank you for shopping with Noori Fashion!</p>',
-    '</div></div>',
-  ].join("");
+  const html = `
+    <div style="max-width:600px;margin:0 auto;font-family:sans-serif">
+      <div style="background:#1A1A1A;padding:20px;text-align:center">
+        <h1 style="color:#E85D24;margin:0;font-size:24px">নূরী ফ্যাশন</h1>
+      </div>
+      <div style="padding:24px;background:#fff">
+        <h2 style="color:#333;margin:0 0 16px">অর্ডার কনফার্মেশন</h2>
+        <p>প্রিয় ${escapeHtml(order.customer_name)},</p>
+        <p>আপনার অর্ডার সফলভাবে প্লেস হয়েছে। অর্ডার নম্বর: <strong>${escapeHtml(order.order_number)}</strong></p>
+        <table style="width:100%;border-collapse:collapse;margin:16px 0">
+          <thead><tr style="background:#f5f5f5"><th style="padding:8px;text-align:left">প্রোডাক্ট</th><th style="padding:8px;text-align:center">পরিমাণ</th><th style="padding:8px;text-align:right">মূল্য</th></tr></thead>
+          <tbody>${itemsHtml}</tbody>
+          <tfoot>
+            <tr><td colspan="2" style="padding:8px;text-align:right">সাবটোটাল</td><td style="padding:8px;text-align:right">৳${order.subtotal}</td></tr>
+            <tr><td colspan="2" style="padding:8px;text-align:right">শিপিং</td><td style="padding:8px;text-align:right">৳${order.shipping_cost}</td></tr>
+            <tr style="font-weight:bold"><td colspan="2" style="padding:8px;text-align:right;border-top:2px solid #E85D24">মোট</td><td style="padding:8px;text-align:right;border-top:2px solid #E85D24;color:#E85D24">৳${order.total}</td></tr>
+          </tfoot>
+        </table>
+        <p style="color:#666;font-size:14px">ধন্যবাদ নূরী ফ্যাশন থেকে শপিং করার জন্য!</p>
+      </div>
+    </div>`;
 
-  // ALWAYS send to shop owner
-  try {
-    console.log("EMAIL: Sending to shop owner business@diptait.com.bd");
-    const res = await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+  // Send to customer if email provided
+  if (order.customer_email) {
+    await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        from: "Noori Fashion <noreply@diptait.com.bd>",
-        to: ["business@diptait.com.bd"],
-        subject: `New Order - ${order.order_number} | ${order.total}`,
+        from: 'Noori Fashion <noreply@diptait.com.bd>',
+        to: [order.customer_email],
+        subject: `অর্ডার কনফার্মেশন — ${order.order_number} | নূরী ফ্যাশন`,
         html,
       }),
     });
-    const data = await res.json();
-    console.log("EMAIL shop owner:", res.status, JSON.stringify(data));
-  } catch (e) {
-    console.error("EMAIL shop owner FAILED:", e);
   }
 
-  // Send to customer if they provided email
-  if (order.customer_email) {
-    try {
-      console.log("EMAIL: Sending to customer", order.customer_email);
-      const res = await fetch("https://api.resend.com/emails", {
-        method: "POST",
-        headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
-        body: JSON.stringify({
-          from: "Noori Fashion <noreply@diptait.com.bd>",
-          to: [order.customer_email],
-          subject: `Order Confirmation - ${order.order_number} | Noori Fashion`,
-          html,
-        }),
-      });
-      const data = await res.json();
-      console.log("EMAIL customer:", res.status, JSON.stringify(data));
-    } catch (e) {
-      console.error("EMAIL customer FAILED:", e);
-    }
-  }
+  // Notify shop owner (Issue #24 — only client email)
+  await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      from: 'Noori Fashion <noreply@diptait.com.bd>',
+      to: [ownerEmail],
+      subject: `নতুন অর্ডার — ${order.order_number} | ৳${order.total}`,
+      html,
+    }),
+  });
 }

@@ -1,36 +1,37 @@
-import { createClient } from "@supabase/supabase-js";
-import type { Metadata } from "next";
-import ProductsClient from "./ProductsClient";
+import { createClient } from '@supabase/supabase-js';
+import ProductsClient from './ProductsClient';
 
-const supabase = createClient(
-  (process.env.NEXT_PUBLIC_SUPABASE_URL || "").trim(),
-  (process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "").trim()
-);
-
-export const metadata: Metadata = {
-  title: "All Products | Noori Fashion",
-  description: "Browse our complete collection of premium women's fashion — exclusive, stitch, unstitch, plazo sets, and co-ord sets.",
-};
-
+const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!);
 export const revalidate = 60;
 
-export default async function ProductsPage({ searchParams }: { searchParams: { sort?: string; page?: string } }) {
-  const page = parseInt(searchParams.page || "1");
-  const perPage = 12;
-  const sort = searchParams.sort || "newest";
-
+export default async function ProductsPage({ searchParams }: { searchParams: { featured?: string; new?: string; sort?: string } }) {
   let query = supabase
-    .from("nf_products")
-    .select("*, nf_categories(*), nf_product_images(*), nf_product_variants(*)", { count: "exact" })
-    .eq("is_active", true);
+    .from('nf_products')
+    .select('*, nf_categories(*), nf_product_images(*), nf_product_variants(*)')
+    .eq('is_active', true);
 
-  if (sort === "price_low") query = query.order("price", { ascending: true });
-  else if (sort === "price_high") query = query.order("price", { ascending: false });
-  else if (sort === "popular") query = query.order("sold_count", { ascending: false });
-  else query = query.order("created_at", { ascending: false });
+  if (searchParams.featured === 'true') {
+    query = query.eq('is_featured', true);
+  }
+  if (searchParams.new === 'true') {
+    query = query.eq('is_new', true);
+  }
 
-  const { data: products, count } = await query.range((page - 1) * perPage, page * perPage - 1);
-  const { data: categories } = await supabase.from("nf_categories").select("*").eq("is_active", true).order("sort_order");
+  const sort = searchParams.sort || 'newest';
+  if (sort === 'price_asc') query = query.order('price', { ascending: true });
+  else if (sort === 'price_desc') query = query.order('price', { ascending: false });
+  else if (sort === 'popular') query = query.order('sold_count', { ascending: false });
+  else query = query.order('created_at', { ascending: false });
 
-  return <ProductsClient products={products || []} totalCount={count || 0} currentPage={page} perPage={perPage} sort={sort} categories={categories || []} />;
+  const { data: products } = await query.limit(48);
+
+  const { data: categories } = await supabase
+    .from('nf_categories')
+    .select('*')
+    .eq('is_active', true)
+    .order('sort_order');
+
+  const title = searchParams.featured === 'true' ? 'ফিচার্ড কালেকশন' : searchParams.new === 'true' ? 'নতুন কালেকশন' : 'সকল প্রোডাক্ট';
+
+  return <ProductsClient products={products || []} categories={categories || []} title={title} />;
 }

@@ -28,6 +28,9 @@ export default async function ProductPage({ params }: { params: { slug: string }
 
   if (!product) notFound();
 
+  // Fire-and-forget: increment view count server-side
+  void supabase.rpc('nf_increment_product_view', { p_product_id: product.id });
+
   const { data: related } = await supabase
     .from("nf_products")
     .select("*, nf_categories(*), nf_product_images(*), nf_product_variants(*)")
