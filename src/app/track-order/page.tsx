@@ -1,22 +1,28 @@
 'use client';
-import { useState, useEffect, Suspense } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useState, useEffect } from 'react';
 import { formatPrice, getStatusColor, getStatusLabel } from '@/lib/utils';
 
-function TrackOrderContent() {
-  const searchParams = useSearchParams();
-  const [query, setQuery] = useState(searchParams.get('order') || '');
+export default function TrackOrderPage() {
+  const [query, setQuery] = useState('');
   const [order, setOrder] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
+  const [autoOrderParam, setAutoOrderParam] = useState<string | null>(null);
 
   useEffect(() => {
-    if (searchParams.get('order')) handleSearch(searchParams.get('order')!);
+    const params = new URLSearchParams(window.location.search);
+    const orderParam = params.get('order');
+    if (orderParam) {
+      setAutoOrderParam(orderParam);
+      setQuery(orderParam);
+      handleSearch(orderParam);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleSearch = async (q?: string) => {
-    const searchQuery = q || query;
-    if (!searchQuery.trim()) return;
+    const searchQuery = (q ?? query).trim();
+    if (!searchQuery) return;
     setLoading(true);
     setSearched(true);
     try {
@@ -36,17 +42,31 @@ function TrackOrderContent() {
     <div className="max-w-2xl mx-auto px-4 py-12">
       <h1 className="font-display text-2xl font-semibold text-center mb-8">Track Your Order</h1>
       <div className="flex gap-2 mb-8">
-        <input value={query} onChange={(e) => setQuery(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handleSearch()} className="input-field flex-1" placeholder="Order number or mobile number" />
-        <button onClick={() => handleSearch()} disabled={loading} className="btn-primary px-6 text-sm">{loading ? '...' : 'Search'}</button>
+        <input
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+          className="input-field flex-1"
+          placeholder="Order number or mobile number"
+        />
+        <button
+          onClick={() => handleSearch()}
+          disabled={loading}
+          className="btn-primary px-6 text-sm"
+        >
+          {loading ? '...' : 'Search'}
+        </button>
       </div>
 
       {searched && !loading && !order && (
-        <p className="text-center text-dark-400 py-8">No order found</p>
+        <p className="text-center text-dark-400 py-8">
+          Order not found. Please check your order number and contact info.
+        </p>
       )}
 
       {order && (
         <div className="animate-fade-in">
-          {searchParams.get('order') && (
+          {autoOrderParam && (
             <div className="bg-green-50 border border-green-200 p-4 mb-6 text-center">
               <p className="text-green-800 font-medium">Your order has been placed successfully!</p>
             </div>
@@ -100,13 +120,5 @@ function TrackOrderContent() {
         </div>
       )}
     </div>
-  );
-}
-
-export default function TrackOrderPage() {
-  return (
-    <Suspense fallback={<div className="max-w-2xl mx-auto px-4 py-12 text-center">Loading...</div>}>
-      <TrackOrderContent />
-    </Suspense>
   );
 }
