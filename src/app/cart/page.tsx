@@ -1,4 +1,5 @@
 'use client';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useCartStore } from '@/lib/store';
@@ -7,12 +8,18 @@ import { getImageUrl } from '@/lib/supabase';
 
 export default function CartPage() {
   const { items, removeItem, updateQuantity, getTotal, clearCart } = useCartStore();
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
 
   const getImg = (product: any): string => {
     const imgs = product.nf_product_images;
     if (imgs && imgs.length > 0) return getImageUrl(imgs[0].url);
     return '/products/placeholder.jpg';
   };
+
+  if (!mounted) {
+    return <div className="max-w-7xl mx-auto px-4 py-20 text-center text-dark-400">Loading cart...</div>;
+  }
 
   if (items.length === 0) {
     return (

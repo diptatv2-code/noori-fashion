@@ -8,6 +8,7 @@ import type { Category } from '@/types';
 
 export default function Header({ categories }: { categories: Category[] }) {
   const [scrolled, setScrolled] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const itemCount = useCartStore((s) => s.getItemCount());
   const toggleCart = useCartStore((s) => s.toggleCart);
   const user = useAuthStore((s) => s.user);
@@ -15,9 +16,10 @@ export default function Header({ categories }: { categories: Category[] }) {
   const settings = useSettings();
 
   const whatsappNumber = settings.whatsapp.replace(/[^0-9]/g, '');
-  const shippingText = `Delivery in Dhaka: ৳${settings.shipping_dhaka} | Outside Dhaka: ৳${settings.shipping_outside} | Free Shipping on ৳${settings.free_shipping_min.toLocaleString('en-BD')}+ Orders`;
+  const shippingText = `Delivery in Dhaka: ৳${settings.shipping_dhaka} | Outside Dhaka: ৳${settings.shipping_outside} | Free Shipping on ৳${settings.free_shipping_min.toLocaleString('en-US')}+ Orders`;
 
   useEffect(() => {
+    setMounted(true);
     const onScroll = () => setScrolled(window.scrollY > 40);
     window.addEventListener('scroll', onScroll);
     return () => window.removeEventListener('scroll', onScroll);
@@ -98,7 +100,7 @@ export default function Header({ categories }: { categories: Category[] }) {
 
               <button onClick={toggleCart} className="p-2 hover:text-brand transition-colors relative" aria-label="Cart">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
-                {itemCount > 0 && (
+                {mounted && itemCount > 0 && (
                   <span className="absolute -top-1 -right-1 bg-brand text-white text-[10px] w-5 h-5 rounded-full flex items-center justify-center font-bold">
                     {itemCount > 9 ? '9+' : itemCount}
                   </span>

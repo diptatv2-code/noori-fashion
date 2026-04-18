@@ -189,7 +189,7 @@ export default function HomeClient({ categories, featured, newArrivals, banners 
             <div className="max-w-md">
               <p className="text-brand text-xs md:text-sm uppercase tracking-widest mb-2 font-medium">Special Offer</p>
               <h2 className="font-display text-3xl md:text-4xl font-bold text-white leading-tight mb-3">
-                <span className="text-brand">Free Delivery</span> on orders ৳{settings.free_shipping_min.toLocaleString('en-BD')}+
+                <span className="text-brand">Free Delivery</span> on orders ৳{settings.free_shipping_min.toLocaleString('en-US')}+
               </h2>
               <p className="text-white/70 text-sm md:text-base mb-4">Delivery across Bangladesh. Pay via Cash on Delivery, bKash, Nagad — any method you prefer.</p>
               <div className="flex gap-3 flex-wrap">

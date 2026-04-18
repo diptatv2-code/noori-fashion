@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useCartStore, useAuthStore } from '@/lib/store';
 import { formatPrice } from '@/lib/utils';
@@ -14,6 +14,8 @@ export default function CheckoutPage() {
   const settings = useSettings();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
   const [form, setForm] = useState({
     name: '', phone: '', email: user?.email || '', address: '', city: 'Dhaka', area: '', payment: 'cod' as PaymentMethod, txnId: '', notes: '',
   });
@@ -84,6 +86,10 @@ export default function CheckoutPage() {
       setLoading(false);
     }
   };
+
+  if (!mounted) {
+    return <div className="max-w-7xl mx-auto px-4 py-20 text-center text-dark-400">Loading checkout...</div>;
+  }
 
   if (items.length === 0) {
     return (
