@@ -6,6 +6,11 @@ import { SUPABASE_URL, SUPABASE_ANON_KEY } from "@/lib/supabase";
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 export const revalidate = 60;
 
+export async function generateStaticParams() {
+  const { data } = await supabase.from("nf_products").select("slug").eq("is_active", true);
+  return (data || []).map((p: { slug: string }) => ({ slug: p.slug }));
+}
+
 export async function generateMetadata({ params }: { params: { slug: string } }) {
   const { data: product } = await supabase.from("nf_products").select("name, description").eq("slug", params.slug).single();
   return {

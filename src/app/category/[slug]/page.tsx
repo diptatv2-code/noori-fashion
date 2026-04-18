@@ -6,6 +6,11 @@ import { SUPABASE_URL, SUPABASE_ANON_KEY } from "@/lib/supabase";
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 export const revalidate = 60;
 
+export async function generateStaticParams() {
+  const { data } = await supabase.from("nf_categories").select("slug").eq("is_active", true);
+  return (data || []).map((c: { slug: string }) => ({ slug: c.slug }));
+}
+
 export async function generateMetadata({ params }: { params: { slug: string } }) {
   const { data: category } = await supabase.from("nf_categories").select("name").eq("slug", params.slug).single();
   return {
@@ -14,39 +19,25 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   };
 }
 
-
-
-export default async function CategoryPage({ params, searchParams }: { params: { slug: string }; searchParams: { sort?: string; page?: string } }) {
+export default async function CategoryPage({ params }: { params: { slug: string } }) {
   const { data: category } = await supabase.from("nf_categories").select("*").eq("slug", params.slug).single();
   if (!category) notFound();
 
-  const page = parseInt(searchParams.page || "1");
-  const perPage = 12;
-  const sort = searchParams.sort || "newest";
-
-  let query = supabase
-    .from("nf_products")
-    .select("*, nf_categories(*), nf_product_images(*), nf_product_variants(*)", { count: "exact" })
-    .eq("is_active", true)
-    .eq("category_id", category.id);
-
-  if (sort === "price_low") query = query.order("price", { ascending: true });
-  else if (sort === "price_high") query = query.order("price", { ascending: false });
-  else if (sort === "popular") query = query.order("sold_count", { ascending: false });
-  else query = query.order("created_at", { ascending: false });
-
-  const { data: products, count } = await query.range((page - 1) * perPage, page * perPage - 1);
-  const { data: categories } = await supabase.from("nf_categories").select("*").eq("is_active", true).order("sort_order");
+  const [productsRes, categoriesRes] = await Promise.all([
+    supabase
+      .from("nf_products")
+      .select("*, nf_categories(*), nf_product_images(*), nf_product_variants(*)")
+      .eq("is_active", true)
+      .eq("category_id", category.id)
+      .order("created_at", { ascending: false }),
+    supabase.from("nf_categories").select("*").eq("is_active", true).order("sort_order"),
+  ]);
 
   return (
     <CategoryClient
       category={category}
-      products={products || []}
-      totalCount={count || 0}
-      currentPage={page}
-      perPage={perPage}
-      sort={sort}
-      categories={categories || []}
+      products={productsRes.data || []}
+      categories={categoriesRes.data || []}
     />
   );
 }

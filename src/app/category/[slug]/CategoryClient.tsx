@@ -1,24 +1,23 @@
 "use client";
 import { useState, useMemo } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import ProductCard from "@/components/ProductCard";
 import QuickViewModal from "@/components/QuickViewModal";
 import type { Category, Product } from "@/types";
 
+type Sort = "newest" | "price_low" | "price_high" | "popular";
+
 interface Props {
   category: Category;
   products: Product[];
-  totalCount: number;
-  currentPage: number;
-  perPage: number;
-  sort: string;
   categories: Category[];
 }
 
-export default function CategoryClient({ category, products, totalCount, currentPage, perPage, sort, categories }: Props) {
-  const router = useRouter();
-  const totalPages = Math.ceil(totalCount / perPage);
+const PER_PAGE = 12;
+
+export default function CategoryClient({ category, products, categories }: Props) {
+  const [sort, setSort] = useState<Sort>("newest");
+  const [page, setPage] = useState(1);
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 100000]);
   const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
 
@@ -30,8 +29,8 @@ export default function CategoryClient({ category, products, totalCount, current
     return Array.from(sizes).sort();
   }, [products]);
 
-  const filteredProducts = useMemo(() => {
-    return products.filter((p) => {
+  const sortedFiltered = useMemo(() => {
+    const filtered = products.filter((p) => {
       if (p.price < priceRange[0] || p.price > priceRange[1]) return false;
       if (selectedSizes.length > 0) {
         const productSizes = p.nf_product_variants?.map((v) => v.size).filter(Boolean) || [];
@@ -39,16 +38,34 @@ export default function CategoryClient({ category, products, totalCount, current
       }
       return true;
     });
-  }, [products, priceRange, selectedSizes]);
+
+    switch (sort) {
+      case "price_low":
+        filtered.sort((a, b) => a.price - b.price);
+        break;
+      case "price_high":
+        filtered.sort((a, b) => b.price - a.price);
+        break;
+      case "popular":
+        filtered.sort((a, b) => (b.sold_count || 0) - (a.sold_count || 0));
+        break;
+      default:
+        filtered.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+    }
+    return filtered;
+  }, [products, sort, priceRange, selectedSizes]);
+
+  const totalPages = Math.ceil(sortedFiltered.length / PER_PAGE);
+  const paged = sortedFiltered.slice((page - 1) * PER_PAGE, page * PER_PAGE);
 
   const toggleSize = (size: string) => {
-    setSelectedSizes((prev) =>
-      prev.includes(size) ? prev.filter((s) => s !== size) : [...prev, size]
-    );
+    setSelectedSizes((prev) => (prev.includes(size) ? prev.filter((s) => s !== size) : [...prev, size]));
+    setPage(1);
   };
 
-  const handleSort = (newSort: string) => {
-    router.push(`/category/${category.slug}?sort=${newSort}&page=1`);
+  const handleSort = (newSort: Sort) => {
+    setSort(newSort);
+    setPage(1);
   };
 
   return (
@@ -66,7 +83,6 @@ export default function CategoryClient({ category, products, totalCount, current
 
       <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="flex flex-col lg:flex-row gap-8">
-          {/* Sidebar */}
           <aside className="lg:w-60 shrink-0">
             <div className="mb-6">
               <h3 className="font-display text-lg font-semibold mb-4">Categories</h3>
@@ -80,19 +96,17 @@ export default function CategoryClient({ category, products, totalCount, current
               </nav>
             </div>
 
-            {/* Price Filter */}
             <div className="mb-6 border-t border-dark-100 pt-4">
               <h4 className="text-sm font-semibold mb-3">Price Range</h4>
               <div className="flex items-center gap-2 text-sm">
-                <input type="number" value={priceRange[0]} onChange={(e) => setPriceRange([Number(e.target.value), priceRange[1]])}
+                <input type="number" value={priceRange[0]} onChange={(e) => { setPriceRange([Number(e.target.value), priceRange[1]]); setPage(1); }}
                   className="w-full border border-dark-200 px-2 py-1.5 text-xs" placeholder="Min" />
                 <span className="text-dark-400">-</span>
-                <input type="number" value={priceRange[1]} onChange={(e) => setPriceRange([priceRange[0], Number(e.target.value)])}
+                <input type="number" value={priceRange[1]} onChange={(e) => { setPriceRange([priceRange[0], Number(e.target.value)]); setPage(1); }}
                   className="w-full border border-dark-200 px-2 py-1.5 text-xs" placeholder="Max" />
               </div>
             </div>
 
-            {/* Size Filter */}
             {allSizes.length > 0 && (
               <div className="border-t border-dark-100 pt-4">
                 <h4 className="text-sm font-semibold mb-3">Size</h4>
@@ -113,14 +127,13 @@ export default function CategoryClient({ category, products, totalCount, current
             )}
           </aside>
 
-          {/* Products */}
           <div className="flex-1">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
               <div>
                 <h1 className="font-display text-2xl font-semibold">{category.name}</h1>
-                <p className="text-sm text-dark-400 mt-1">{filteredProducts.length} of {totalCount} products</p>
+                <p className="text-sm text-dark-400 mt-1">{sortedFiltered.length} of {products.length} products</p>
               </div>
-              <select value={sort} onChange={(e) => handleSort(e.target.value)} className="input-field w-auto text-sm py-2">
+              <select value={sort} onChange={(e) => handleSort(e.target.value as Sort)} className="input-field w-auto text-sm py-2">
                 <option value="newest">Newest First</option>
                 <option value="price_low">Price: Low to High</option>
                 <option value="price_high">Price: High to Low</option>
@@ -128,11 +141,11 @@ export default function CategoryClient({ category, products, totalCount, current
               </select>
             </div>
 
-            {filteredProducts.length === 0 ? (
+            {paged.length === 0 ? (
               <div className="text-center py-20"><p className="text-dark-400">No products found matching your filters</p></div>
             ) : (
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
-                {filteredProducts.map((product) => (
+                {paged.map((product) => (
                   <ProductCard key={product.id} product={product} />
                 ))}
               </div>
@@ -140,21 +153,21 @@ export default function CategoryClient({ category, products, totalCount, current
 
             {totalPages > 1 && (
               <div className="flex justify-center gap-2 mt-10">
-                {currentPage > 1 && (
-                  <Link href={`/category/${category.slug}?sort=${sort}&page=${currentPage - 1}`} className="px-4 py-2 border border-dark-200 text-sm hover:border-brand hover:text-brand transition-colors">
+                {page > 1 && (
+                  <button onClick={() => setPage(page - 1)} className="px-4 py-2 border border-dark-200 text-sm hover:border-brand hover:text-brand transition-colors">
                     Previous
-                  </Link>
+                  </button>
                 )}
                 {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
-                  <Link key={p} href={`/category/${category.slug}?sort=${sort}&page=${p}`}
-                    className={`w-10 h-10 flex items-center justify-center text-sm border transition-colors ${p === currentPage ? "bg-brand text-white border-brand" : "border-dark-200 hover:border-brand hover:text-brand"}`}>
+                  <button key={p} onClick={() => setPage(p)}
+                    className={`w-10 h-10 flex items-center justify-center text-sm border transition-colors ${p === page ? "bg-brand text-white border-brand" : "border-dark-200 hover:border-brand hover:text-brand"}`}>
                     {p}
-                  </Link>
+                  </button>
                 ))}
-                {currentPage < totalPages && (
-                  <Link href={`/category/${category.slug}?sort=${sort}&page=${currentPage + 1}`} className="px-4 py-2 border border-dark-200 text-sm hover:border-brand hover:text-brand transition-colors">
+                {page < totalPages && (
+                  <button onClick={() => setPage(page + 1)} className="px-4 py-2 border border-dark-200 text-sm hover:border-brand hover:text-brand transition-colors">
                     Next
-                  </Link>
+                  </button>
                 )}
               </div>
             )}
