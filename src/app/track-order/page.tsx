@@ -41,18 +41,18 @@ export default function TrackOrderPage() {
   return (
     <div className="max-w-2xl mx-auto px-4 py-12">
       <h1 className="font-display text-2xl font-semibold text-center mb-8">Track Your Order</h1>
-      <div className="flex gap-2 mb-8">
+      <div className="flex flex-col sm:flex-row gap-2 mb-8">
         <input
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-          className="input-field flex-1"
+          className="input-field sm:flex-1"
           placeholder="Order number or mobile number"
         />
         <button
           onClick={() => handleSearch()}
           disabled={loading}
-          className="btn-primary px-6 text-sm"
+          className="btn-primary px-6 text-sm w-full sm:w-auto"
         >
           {loading ? '...' : 'Search'}
         </button>
