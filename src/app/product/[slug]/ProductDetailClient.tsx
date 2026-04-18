@@ -56,7 +56,8 @@ export default function ProductDetailClient({ product, related }: { product: Pro
     setTimeout(() => setCartOpen(true), 100);
   };
 
-  const mainImg = images.length > 0 ? getImageUrl(images[selectedImage]?.url || images[0].url) : '/products/placeholder.jpg';
+  const placeholderImg = '/products/placeholder.jpg';
+  const galleryImages = images.length > 0 ? images : [{ id: 'placeholder', url: placeholderImg }];
 
   return (
     <>
@@ -80,7 +81,17 @@ export default function ProductDetailClient({ product, related }: { product: Pro
           {/* Gallery */}
           <div>
             <div className="aspect-[3/4] relative bg-dark-50 overflow-hidden mb-3">
-              <Image src={mainImg} alt={product.name} fill className="object-cover" sizes="(max-width: 768px) 100vw, 50vw" priority />
+              {galleryImages.map((img, idx) => (
+                <Image
+                  key={img.id}
+                  src={getImageUrl(img.url)}
+                  alt={product.name}
+                  fill
+                  sizes="(max-width: 768px) 100vw, 50vw"
+                  className={`object-cover transition-opacity duration-200 ${idx === selectedImage ? 'opacity-100' : 'opacity-0'}`}
+                  priority={idx === 0}
+                />
+              ))}
               {discount > 0 && <span className="badge-sale">-{discount}%</span>}
               {product.is_new && <span className="badge-new">New</span>}
             </div>
