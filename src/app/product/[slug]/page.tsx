@@ -12,10 +12,41 @@ export async function generateStaticParams() {
 }
 
 export async function generateMetadata({ params }: { params: { slug: string } }) {
-  const { data: product } = await supabase.from("nf_products").select("name, description").eq("slug", params.slug).single();
+  const { data: product } = await supabase
+    .from("nf_products")
+    .select("name, description, nf_product_images(url)")
+    .eq("slug", params.slug)
+    .single();
+
+  if (!product) {
+    return { title: "Product | Noori Fashion", description: "Premium women's fashion at Noori Fashion." };
+  }
+
+  const firstImage = product.nf_product_images?.[0]?.url;
+  const imageUrl = firstImage
+    ? (firstImage.startsWith("http") ? firstImage : `${SUPABASE_URL}/storage/v1/object/public/noori-fashion/${firstImage}`)
+    : undefined;
+
+  const title = `${product.name} | Noori Fashion`;
+  const description = product.description || "Premium women's fashion at Noori Fashion.";
+  const base = (process.env.NEXT_PUBLIC_SITE_URL || "https://noori.diptait.com.bd").trim();
+
   return {
-    title: product ? `${product.name} | Noori Fashion` : "Product | Noori Fashion",
-    description: product?.description || "Premium women's fashion at Noori Fashion.",
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      url: `${base}/product/${params.slug}`,
+      type: "website",
+      images: imageUrl ? [{ url: imageUrl, alt: product.name }] : undefined,
+    },
+    twitter: {
+      card: imageUrl ? "summary_large_image" : "summary",
+      title,
+      description,
+      images: imageUrl ? [imageUrl] : undefined,
+    },
   };
 }
 

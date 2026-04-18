@@ -9,10 +9,14 @@ export default function AdminOrdersPage() {
   const [selected, setSelected] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
+  const [error, setError] = useState("");
   const fetchOrders = async () => {
+    setLoading(true);
+    setError("");
     let q = supabase.from("nf_orders").select("*, nf_order_items(*)").order("created_at", { ascending: false });
     if (filter !== "all") q = q.eq("order_status", filter);
-    const { data } = await q;
+    const { data, error: err } = await q;
+    if (err) setError(err.message || "Failed to load orders");
     setOrders(data || []);
     setLoading(false);
   };
@@ -38,6 +42,8 @@ export default function AdminOrdersPage() {
           <option value="cancelled">Cancelled</option>
         </select>
       </div>
+      {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
+      {loading && <p className="text-dark-400 text-sm mb-4">Loading orders...</p>}
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead className="bg-dark-50"><tr>
