@@ -24,6 +24,7 @@ export default function AdminProductsPage() {
 
   const [uploading, setUploading] = useState(false);
   const [uploadMsg, setUploadMsg] = useState<string>('');
+  const [saveError, setSaveError] = useState<string>('');
 
   const emptyProduct = {
     name: '', slug: '', description: '', price: 0, compare_price: null,
@@ -67,41 +68,64 @@ export default function AdminProductsPage() {
     setShowCustomSize(false);
   }, [editing?.id]);
 
+  // Clear per-modal feedback when the modal opens/closes or switches to a different product
+  useEffect(() => {
+    setSaveError('');
+    setUploadMsg('');
+    if (fileRef.current) fileRef.current.value = '';
+  }, [editing?.id, editing === null]);
+
   const handleSave = async () => {
     if (!editing) return;
+    if (!editing.name || !editing.name.trim()) {
+      setSaveError('প্রোডাক্টের নাম দিন');
+      return;
+    }
     setSaving(true);
+    setSaveError('');
     const { nf_categories, nf_product_images, nf_product_variants, id, created_at, updated_at, sold_count, view_count, tags, ...data } = editing;
 
     if (!data.slug) data.slug = data.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/-+/g, '-');
 
+    let targetId = id as string | undefined;
+
     if (id) {
-      // Update existing product
-      await supabase.from('nf_products').update(data).eq('id', id);
-      setSaving(false);
-      setEditing(null);
-      fetchAll();
-    } else {
-      // Insert new product, then switch to edit mode with the new ID
-      const { data: inserted, error } = await supabase.from('nf_products').insert(data).select().single();
-      setSaving(false);
-      if (!error && inserted) {
-        // Refresh product list, then open the newly created product in edit mode
-        const [p] = await Promise.all([
-          supabase.from('nf_products').select('*, nf_categories(*), nf_product_images(*), nf_product_variants(*)').order('created_at', { ascending: false }),
-        ]);
-        setProducts(p.data || []);
-        // Find the newly inserted product to open in edit mode
-        const newProduct = (p.data || []).find((prod: Product) => prod.id === inserted.id);
-        if (newProduct) {
-          setEditing({ ...newProduct });
-        } else {
-          setEditing(null);
-        }
-      } else {
-        setEditing(null);
-        fetchAll();
+      const { error } = await supabase.from('nf_products').update(data).eq('id', id);
+      if (error) {
+        setSaving(false);
+        setSaveError(error.message || 'আপডেট ব্যর্থ হয়েছে');
+        return;
       }
+    } else {
+      const { data: inserted, error } = await supabase.from('nf_products').insert(data).select().single();
+      if (error || !inserted) {
+        setSaving(false);
+        setSaveError((error && (error.message.includes('duplicate') || error.message.includes('nf_products_slug_key'))
+          ? 'এই স্লাগ আগে থেকেই ব্যবহৃত হয়েছে — অন্য একটি দিন'
+          : error?.message) || 'প্রোডাক্ট তৈরি করা যায়নি');
+        return;
+      }
+      targetId = inserted.id;
     }
+
+    // Upload any files the admin queued in this modal (works for both new + existing products)
+    const files = fileRef.current?.files;
+    if (targetId && files && files.length > 0) {
+      await uploadFiles(targetId);
+    }
+
+    // Refresh the edit state from the DB so newly-inserted images and the ID are visible
+    if (targetId) {
+      const { data: refreshed } = await supabase
+        .from('nf_products')
+        .select('*, nf_categories(*), nf_product_images(*), nf_product_variants(*)')
+        .eq('id', targetId)
+        .single();
+      if (refreshed) setEditing({ ...refreshed });
+    }
+
+    setSaving(false);
+    fetchAll();
   };
 
   const handleDelete = async (id: string) => {
@@ -110,7 +134,9 @@ export default function AdminProductsPage() {
     fetchAll();
   };
 
-  const handleImageUpload = async (productId: string) => {
+  // Shared upload routine: reads files from fileRef, compresses, uploads, inserts DB rows.
+  // Returns when done. Called from handleSave (post-insert) and from the "Upload" button.
+  const uploadFiles = async (productId: string) => {
     const files = fileRef.current?.files;
     if (!files || files.length === 0) return;
 
@@ -138,23 +164,24 @@ export default function AdminProductsPage() {
       }
     }
 
-    const { data: refreshed } = await supabase
-      .from('nf_products')
-      .select('*, nf_categories(*), nf_product_images(*), nf_product_variants(*)')
-      .eq('id', productId)
-      .single();
-    if (refreshed) {
-      setEditing({ ...refreshed });
-    }
-    fetchAll();
     if (fileRef.current) fileRef.current.value = '';
-
     setUploading(false);
     if (uploaded > 0) {
       setUploadMsg(`Uploaded ${uploaded} image${uploaded > 1 ? 's' : ''}: ${formatBytes(totalOriginal)} → ${formatBytes(totalCompressed)} (${Math.round((1 - totalCompressed / totalOriginal) * 100)}% smaller)`);
     } else {
       setUploadMsg('Upload failed');
     }
+  };
+
+  const handleImageUpload = async (productId: string) => {
+    await uploadFiles(productId);
+    const { data: refreshed } = await supabase
+      .from('nf_products')
+      .select('*, nf_categories(*), nf_product_images(*), nf_product_variants(*)')
+      .eq('id', productId)
+      .single();
+    if (refreshed) setEditing({ ...refreshed });
+    fetchAll();
   };
 
   const deleteImage = async (imageId: string, url: string) => {
@@ -283,10 +310,16 @@ export default function AdminProductsPage() {
             </button>
             <h2 className="font-display text-lg font-semibold mb-4">{editing.id ? 'প্রোডাক্ট সম্পাদনা' : 'নতুন প্রোডাক্ট'}</h2>
 
-            {/* When creating a new product (no ID), show a notice */}
+            {/* When creating a new product, note that variants still need a save-first step */}
             {!editing.id && (
               <div className="mb-4 p-3 bg-blue-50 border border-blue-200 text-blue-800 text-xs rounded">
-                প্রথমে প্রোডাক্ট সেভ করুন, তারপর ছবি ও ভেরিয়েন্ট যোগ করতে পারবেন।
+                ছবি এই মডালে সিলেক্ট করে সেভ করলে একসাথে আপলোড হবে। ভেরিয়েন্ট/সাইজ প্রোডাক্ট সেভ হওয়ার পরে যোগ করতে পারবেন।
+              </div>
+            )}
+
+            {saveError && (
+              <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 text-xs rounded">
+                {saveError}
               </div>
             )}
 
@@ -349,10 +382,10 @@ export default function AdminProductsPage() {
               </div>
             </div>
 
-            {/* Images - only when product has been saved (has ID) */}
-            {editing.id && (
-              <div className="mt-4 pt-4 border-t">
-                <h3 className="text-sm font-semibold mb-2">ছবি</h3>
+            {/* Images — file input is always visible; existing images grid appears once the product is saved */}
+            <div className="mt-4 pt-4 border-t">
+              <h3 className="text-sm font-semibold mb-2">ছবি</h3>
+              {editing.id && (editing.nf_product_images || []).length > 0 && (
                 <div className="flex flex-wrap gap-2 mb-3">
                   {(editing.nf_product_images || []).map((img: any) => (
                     <div key={img.id} className="relative w-20 h-24 bg-dark-50 overflow-hidden group">
@@ -363,16 +396,22 @@ export default function AdminProductsPage() {
                     </div>
                   ))}
                 </div>
-                <div className="flex gap-2 items-center flex-wrap">
-                  <input ref={fileRef} type="file" accept="image/*" multiple className="text-xs" disabled={uploading} />
-                  <button onClick={() => handleImageUpload(editing.id)} disabled={uploading} className="text-xs bg-brand text-white px-3 py-1.5 disabled:opacity-50">
-                    {uploading ? 'আপলোড হচ্ছে...' : 'আপলোড'}
+              )}
+              <div className="flex gap-2 items-center flex-wrap">
+                <input ref={fileRef} type="file" accept="image/*" multiple className="text-xs" disabled={uploading || saving} />
+                {editing.id && (
+                  <button onClick={() => handleImageUpload(editing.id)} disabled={uploading || saving} className="text-xs bg-brand text-white px-3 py-1.5 disabled:opacity-50">
+                    {uploading ? 'আপলোড হচ্ছে...' : 'এখন আপলোড'}
                   </button>
-                </div>
-                {uploadMsg && <p className="text-[10px] text-dark-400 mt-1">{uploadMsg}</p>}
-                <p className="text-[10px] text-dark-300 mt-1">ছবি স্বয়ংক্রিয়ভাবে WebP-তে কম্প্রেস হবে (~৫০০ KB, সর্বোচ্চ ১৬০০px)।</p>
+                )}
               </div>
-            )}
+              {uploadMsg && <p className="text-[10px] text-dark-400 mt-1">{uploadMsg}</p>}
+              <p className="text-[10px] text-dark-300 mt-1">
+                {editing.id
+                  ? 'ছবি স্বয়ংক্রিয়ভাবে WebP-তে কম্প্রেস হবে (~৫০০ KB, সর্বোচ্চ ১৬০০px)।'
+                  : 'ছবি সিলেক্ট করুন — প্রোডাক্ট সেভ করলে একসাথে কম্প্রেস ও আপলোড হবে।'}
+              </p>
+            </div>
 
             {/* Variants - only when product has been saved (has ID) */}
             {editing.id && (
