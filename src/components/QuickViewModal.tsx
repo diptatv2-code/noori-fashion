@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useUIStore, useCartStore } from '@/lib/store';
 import { formatPrice, getDiscount } from '@/lib/utils';
 import { getImageUrl } from '@/lib/supabase';
+import WishlistButton from '@/components/WishlistButton';
 
 export default function QuickViewModal() {
   const product = useUIStore((s) => s.quickViewProduct);
@@ -43,6 +44,7 @@ export default function QuickViewModal() {
           <div className="aspect-[3/4] relative bg-dark-50">
             <Image src={getImg()} alt={product.name} fill className="object-cover" sizes="400px" />
             {discount > 0 && <span className="badge-sale">-{discount}%</span>}
+            <WishlistButton productId={product.id} className="absolute top-3 left-3" />
           </div>
           <div className="p-6">
             {product.nf_categories && (

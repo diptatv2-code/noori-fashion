@@ -1,12 +1,22 @@
 'use client';
 import { useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
-import { useAuthStore } from '@/lib/store';
+import { useAuthStore, useWishlistStore } from '@/lib/store';
 
 export default function AuthProvider() {
   const setUser = useAuthStore((s) => s.setUser);
+  const setWishlistIds = useWishlistStore((s) => s.setIds);
+  const clearWishlist = useWishlistStore((s) => s.clear);
 
   useEffect(() => {
+    const loadWishlist = async (userId: string) => {
+      const { data } = await supabase
+        .from('nf_wishlist')
+        .select('product_id')
+        .eq('user_id', userId);
+      setWishlistIds((data || []).map((r: { product_id: string }) => r.product_id));
+    };
+
     const loadProfile = async (userId: string, email: string) => {
       let { data: profile } = await supabase
         .from('nf_profiles')
@@ -14,7 +24,6 @@ export default function AuthProvider() {
         .eq('id', userId)
         .single();
 
-      // Auto-create profile if missing (trigger may have failed)
       if (!profile) {
         await supabase.from('nf_profiles').upsert(
           { id: userId, email, role: 'customer' },
@@ -28,6 +37,8 @@ export default function AuthProvider() {
         email,
         role: profile.role || 'customer',
       });
+
+      loadWishlist(userId).catch(() => {});
     };
 
     const getUser = async () => {
@@ -43,11 +54,12 @@ export default function AuthProvider() {
         await loadProfile(session.user.id, session.user.email || '');
       } else {
         setUser(null);
+        clearWishlist();
       }
     });
 
     return () => subscription.unsubscribe();
-  }, [setUser]);
+  }, [setUser, setWishlistIds, clearWishlist]);
 
   return null;
 }

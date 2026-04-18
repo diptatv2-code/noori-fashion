@@ -105,3 +105,31 @@ export const useUIStore = create<UIStore>((set) => ({
   toggleMenu: () => set((s) => ({ isMenuOpen: !s.isMenuOpen })),
   setQuickView: (product) => set({ quickViewProduct: product }),
 }));
+
+interface WishlistStore {
+  ids: Set<string>;
+  loaded: boolean;
+  setIds: (ids: string[]) => void;
+  add: (productId: string) => void;
+  remove: (productId: string) => void;
+  clear: () => void;
+}
+
+export const useWishlistStore = create<WishlistStore>((set) => ({
+  ids: new Set<string>(),
+  loaded: false,
+  setIds: (ids) => set({ ids: new Set(ids), loaded: true }),
+  add: (productId) =>
+    set((s) => {
+      const next = new Set(s.ids);
+      next.add(productId);
+      return { ids: next };
+    }),
+  remove: (productId) =>
+    set((s) => {
+      const next = new Set(s.ids);
+      next.delete(productId);
+      return { ids: next };
+    }),
+  clear: () => set({ ids: new Set<string>(), loaded: false }),
+}));

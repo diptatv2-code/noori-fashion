@@ -7,6 +7,7 @@ import { formatPrice, getDiscount } from '@/lib/utils';
 import { getImageUrl } from '@/lib/supabase';
 import { useSettings } from '@/components/SettingsProvider';
 import ProductCard from '@/components/ProductCard';
+import WishlistButton from '@/components/WishlistButton';
 import type { Product } from '@/types';
 
 export default function ProductDetailClient({ product, related }: { product: Product; related: Product[] }) {
@@ -164,13 +165,14 @@ export default function ProductDetailClient({ product, related }: { product: Pro
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-3 mb-6">
+            <div className="grid grid-cols-[1fr_1fr_auto] gap-3 mb-6 items-stretch">
               <button onClick={handleAdd} className={`btn-outline text-sm py-3 ${added ? 'bg-green-600 text-white border-green-600' : ''}`}>
                 {added ? '✓ Added' : 'Add to Bag'}
               </button>
               <button onClick={handleBuyNow} className="btn-primary text-sm py-3">
                 Buy Now
               </button>
+              <WishlistButton productId={product.id} className="!w-12 !h-auto !rounded-none border border-dark-200" />
             </div>
 
             {/* Info */}

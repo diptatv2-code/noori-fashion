@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { useCartStore, useUIStore } from '@/lib/store';
 import { formatPrice, getDiscount } from '@/lib/utils';
 import { getImageUrl } from '@/lib/supabase';
+import WishlistButton from '@/components/WishlistButton';
 import type { Product } from '@/types';
 
 function getImg(product: Product): string {
@@ -29,6 +30,9 @@ export default function ProductCard({ product }: { product: Product }) {
       {/* Badges */}
       {product.is_new && <span className="badge-new">New</span>}
       {discount > 0 && <span className="badge-sale">-{discount}%</span>}
+
+      {/* Wishlist toggle */}
+      <WishlistButton productId={product.id} className="absolute top-2 right-2 z-10" />
 
       {/* Image */}
       <Link href={`/product/${product.slug}`} className="block relative aspect-[3/4] bg-dark-50 overflow-hidden mb-3">
