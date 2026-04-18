@@ -1,5 +1,5 @@
 'use client';
-import { useState, useMemo } from 'react';
+import { Suspense, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useSearchParams, useRouter } from 'next/navigation';
 import ProductCard from '@/components/ProductCard';
@@ -8,14 +8,38 @@ import type { Category, Product } from '@/types';
 
 type Sort = 'newest' | 'price_asc' | 'price_desc' | 'popular';
 
-export default function ProductsClient({ products, categories }: { products: Product[]; categories: Category[] }) {
-  const router = useRouter();
+function URLSyncer({ sort, onLoad }: { sort: Sort; onLoad: (filters: { featured: boolean; isNew: boolean; sort: Sort }) => void }) {
   const searchParams = useSearchParams();
-  const isFeatured = searchParams.get('featured') === 'true';
-  const isNew = searchParams.get('new') === 'true';
-  const initialSort = (searchParams.get('sort') as Sort) || 'newest';
+  const router = useRouter();
 
-  const [sort, setSort] = useState<Sort>(initialSort);
+  useEffect(() => {
+    onLoad({
+      featured: searchParams.get('featured') === 'true',
+      isNew: searchParams.get('new') === 'true',
+      sort: (searchParams.get('sort') as Sort) || 'newest',
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
+
+  useEffect(() => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (sort === 'newest') params.delete('sort');
+    else params.set('sort', sort);
+    const next = params.toString();
+    const current = searchParams.toString();
+    if (next !== current) {
+      router.replace(`/products${next ? `?${next}` : ''}`, { scroll: false });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sort]);
+
+  return null;
+}
+
+function Inner({ products, categories }: { products: Product[]; categories: Category[] }) {
+  const [isFeatured, setIsFeatured] = useState(false);
+  const [isNew, setIsNew] = useState(false);
+  const [sort, setSort] = useState<Sort>('newest');
 
   const title = isFeatured ? 'Featured Collection' : isNew ? 'New Arrivals' : 'All Products';
 
@@ -40,15 +64,14 @@ export default function ProductsClient({ products, categories }: { products: Pro
     return list;
   }, [products, isFeatured, isNew, sort]);
 
-  const handleSort = (val: Sort) => {
-    setSort(val);
-    const params = new URLSearchParams(searchParams.toString());
-    params.set('sort', val);
-    router.replace(`/products?${params.toString()}`, { scroll: false });
-  };
-
   return (
     <>
+      <Suspense fallback={null}>
+        <URLSyncer
+          sort={sort}
+          onLoad={(f) => { setIsFeatured(f.featured); setIsNew(f.isNew); setSort(f.sort); }}
+        />
+      </Suspense>
       <QuickViewModal />
       <div className="bg-dark-50 py-3">
         <div className="max-w-7xl mx-auto px-4 flex items-center gap-2 text-sm text-dark-400">
@@ -63,7 +86,7 @@ export default function ProductsClient({ products, categories }: { products: Pro
             <h1 className="font-display text-2xl md:text-3xl font-semibold">{title}</h1>
             <p className="text-dark-400 text-sm mt-1">{visible.length} products</p>
           </div>
-          <select value={sort} onChange={(e) => handleSort(e.target.value as Sort)} className="input-field w-auto text-sm">
+          <select value={sort} onChange={(e) => setSort(e.target.value as Sort)} className="input-field w-auto text-sm">
             <option value="newest">Newest</option>
             <option value="price_asc">Price: Low to High</option>
             <option value="price_desc">Price: High to Low</option>
@@ -91,4 +114,8 @@ export default function ProductsClient({ products, categories }: { products: Pro
       </div>
     </>
   );
+}
+
+export default function ProductsClient({ products, categories }: { products: Product[]; categories: Category[] }) {
+  return <Inner products={products} categories={categories} />;
 }
