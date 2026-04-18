@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
+import { SUPABASE_URL, SUPABASE_ANON_KEY } from '@/lib/supabase';
 
 export interface SiteSettings {
   site_name: string;
@@ -40,10 +41,7 @@ const defaults: SiteSettings = {
 
 export async function getSettings(): Promise<SiteSettings> {
   try {
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-    );
+    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     const { data } = await supabase.from('nf_settings').select('key, value');
     if (!data) return defaults;
 

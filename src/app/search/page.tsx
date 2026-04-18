@@ -1,7 +1,8 @@
 import { createClient } from '@supabase/supabase-js';
 import SearchClient from './SearchClient';
+import { SUPABASE_URL, SUPABASE_ANON_KEY } from '@/lib/supabase';
 
-const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!);
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 export default async function SearchPage({ searchParams }: { searchParams: { q?: string } }) {
   const q = searchParams.q || '';

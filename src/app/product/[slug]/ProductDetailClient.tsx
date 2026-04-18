@@ -1,5 +1,5 @@
 'use client';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useCartStore } from '@/lib/store';
@@ -22,6 +22,15 @@ export default function ProductDetailClient({ product, related }: { product: Pro
   const [added, setAdded] = useState(false);
   const addItem = useCartStore((s) => s.addItem);
   const setCartOpen = useCartStore((s) => s.setCartOpen);
+
+  useEffect(() => {
+    fetch('/api/product-view', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ product_id: product.id }),
+      keepalive: true,
+    }).catch(() => {});
+  }, [product.id]);
 
   const activePrice = useMemo(() => {
     if (selectedSize) {

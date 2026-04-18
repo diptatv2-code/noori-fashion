@@ -9,6 +9,7 @@ import AuthProvider from '@/components/AuthProvider';
 import { SettingsProvider } from '@/components/SettingsProvider';
 import { getSettings } from '@/lib/settings';
 import { createClient } from '@supabase/supabase-js';
+import { SUPABASE_URL, SUPABASE_ANON_KEY } from '@/lib/supabase';
 
 export const revalidate = 60;
 
@@ -28,10 +29,7 @@ export const metadata: Metadata = {
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const settings = await getSettings();
 
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  );
+  const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
   const { data: categories } = await supabase
     .from('nf_categories')
     .select('*')

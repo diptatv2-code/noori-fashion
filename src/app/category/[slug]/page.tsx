@@ -1,11 +1,9 @@
 import { createClient } from "@supabase/supabase-js";
 import { notFound } from "next/navigation";
 import CategoryClient from "./CategoryClient";
+import { SUPABASE_URL, SUPABASE_ANON_KEY } from "@/lib/supabase";
 
-const supabase = createClient(
-  (process.env.NEXT_PUBLIC_SUPABASE_URL || "").trim(),
-  (process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "").trim()
-);
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 export const revalidate = 60;
 
 export async function generateMetadata({ params }: { params: { slug: string } }) {

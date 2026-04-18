@@ -1,7 +1,8 @@
 import { createClient } from '@supabase/supabase-js';
 import ProductsClient from './ProductsClient';
+import { SUPABASE_URL, SUPABASE_ANON_KEY } from '@/lib/supabase';
 
-const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!);
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 export const revalidate = 60;
 
 export default async function ProductsPage({ searchParams }: { searchParams: { featured?: string; new?: string; sort?: string } }) {
