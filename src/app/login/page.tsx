@@ -8,6 +8,7 @@ function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirect = searchParams.get("redirect") || "/account";
+  const hasRedirect = redirect !== "/account";
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -24,12 +25,17 @@ function LoginForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div><label className="block text-xs font-medium text-dark-500 mb-1">Email</label><input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="input-field" required /></div>
-      <div><label className="block text-xs font-medium text-dark-500 mb-1">Password</label><input type="password" value={password} onChange={(e) => setPassword(e.target.value)} className="input-field" required /></div>
-      {error && <p className="text-red-500 text-sm">{error}</p>}
-      <button type="submit" disabled={loading} className="btn-primary w-full disabled:opacity-50">{loading ? "Signing in..." : "Sign In"}</button>
-    </form>
+    <>
+      {hasRedirect && (
+        <p className="text-sm text-dark-400 bg-brand-50 border border-brand/20 p-3 mb-4">Please sign in to continue.</p>
+      )}
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div><label className="block text-xs font-medium text-dark-500 mb-1">Email</label><input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="input-field" required /></div>
+        <div><label className="block text-xs font-medium text-dark-500 mb-1">Password</label><input type="password" value={password} onChange={(e) => setPassword(e.target.value)} className="input-field" required /></div>
+        {error && <p className="text-red-500 text-sm">{error}</p>}
+        <button type="submit" disabled={loading} className="btn-primary w-full disabled:opacity-50">{loading ? "Signing in..." : "Sign In"}</button>
+      </form>
+    </>
   );
 }
 
