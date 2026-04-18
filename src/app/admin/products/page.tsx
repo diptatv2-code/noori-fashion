@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import { supabase, getImageUrl } from '@/lib/supabase';
 import { formatPrice } from '@/lib/utils';
+import { compressImage, formatBytes } from '@/lib/compress';
 import type { Category, Product, ProductVariant } from '@/types';
 
 const SIZES = ['38', '40', '42', '44', '46', 'Free Size'];
@@ -20,6 +21,9 @@ export default function AdminProductsPage() {
   const [variantLoading, setVariantLoading] = useState(false);
   const [newVariant, setNewVariant] = useState({ size: '', stock: 0, price_override: '' as string | number, customSize: '' });
   const [showCustomSize, setShowCustomSize] = useState(false);
+
+  const [uploading, setUploading] = useState(false);
+  const [uploadMsg, setUploadMsg] = useState<string>('');
 
   const emptyProduct = {
     name: '', slug: '', description: '', price: 0, compare_price: null,
@@ -110,15 +114,30 @@ export default function AdminProductsPage() {
     const files = fileRef.current?.files;
     if (!files || files.length === 0) return;
 
-    for (const file of Array.from(files)) {
-      const ext = file.name.split('.').pop();
-      const path = `products/${productId}/${Date.now()}.${ext}`;
-      const { error } = await supabase.storage.from('noori-fashion').upload(path, file);
+    setUploading(true);
+    setUploadMsg('');
+    let totalOriginal = 0;
+    let totalCompressed = 0;
+    let uploaded = 0;
+
+    for (const original of Array.from(files)) {
+      setUploadMsg(`Compressing ${original.name}...`);
+      const { file, originalSize, compressedSize } = await compressImage(original);
+      totalOriginal += originalSize;
+      totalCompressed += compressedSize;
+
+      const ext = file.name.split('.').pop() || 'webp';
+      const path = `products/${productId}/${Date.now()}-${uploaded}.${ext}`;
+      setUploadMsg(`Uploading ${file.name} (${formatBytes(originalSize)} → ${formatBytes(compressedSize)})...`);
+      const { error } = await supabase.storage.from('noori-fashion').upload(path, file, {
+        contentType: file.type,
+      });
       if (!error) {
         await supabase.from('nf_product_images').insert({ product_id: productId, url: path, is_primary: false });
+        uploaded++;
       }
     }
-    // Reload products and update the editing state with fresh images
+
     const { data: refreshed } = await supabase
       .from('nf_products')
       .select('*, nf_categories(*), nf_product_images(*), nf_product_variants(*)')
@@ -129,6 +148,13 @@ export default function AdminProductsPage() {
     }
     fetchAll();
     if (fileRef.current) fileRef.current.value = '';
+
+    setUploading(false);
+    if (uploaded > 0) {
+      setUploadMsg(`Uploaded ${uploaded} image${uploaded > 1 ? 's' : ''}: ${formatBytes(totalOriginal)} → ${formatBytes(totalCompressed)} (${Math.round((1 - totalCompressed / totalOriginal) * 100)}% smaller)`);
+    } else {
+      setUploadMsg('Upload failed');
+    }
   };
 
   const deleteImage = async (imageId: string, url: string) => {
@@ -337,10 +363,14 @@ export default function AdminProductsPage() {
                     </div>
                   ))}
                 </div>
-                <div className="flex gap-2 items-center">
-                  <input ref={fileRef} type="file" accept="image/*" multiple className="text-xs" />
-                  <button onClick={() => handleImageUpload(editing.id)} className="text-xs bg-brand text-white px-3 py-1.5">আপলোড</button>
+                <div className="flex gap-2 items-center flex-wrap">
+                  <input ref={fileRef} type="file" accept="image/*" multiple className="text-xs" disabled={uploading} />
+                  <button onClick={() => handleImageUpload(editing.id)} disabled={uploading} className="text-xs bg-brand text-white px-3 py-1.5 disabled:opacity-50">
+                    {uploading ? 'আপলোড হচ্ছে...' : 'আপলোড'}
+                  </button>
                 </div>
+                {uploadMsg && <p className="text-[10px] text-dark-400 mt-1">{uploadMsg}</p>}
+                <p className="text-[10px] text-dark-300 mt-1">ছবি স্বয়ংক্রিয়ভাবে WebP-তে কম্প্রেস হবে (~৫০০ KB, সর্বোচ্চ ১৬০০px)।</p>
               </div>
             )}
 

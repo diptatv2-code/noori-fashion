@@ -3,10 +3,13 @@ import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { supabase } from "@/lib/supabase";
 import { getImageUrl } from "@/lib/supabase";
+import { compressImage, formatBytes } from "@/lib/compress";
 
 export default function AdminBannersPage() {
   const [banners, setBanners] = useState<any[]>([]);
   const [editing, setEditing] = useState<any>(null);
+  const [uploading, setUploading] = useState(false);
+  const [uploadMsg, setUploadMsg] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
 
   const fetch_ = async () => { const { data } = await supabase.from("nf_banners").select("*").order("sort_order"); setBanners(data || []); };
@@ -15,16 +18,25 @@ export default function AdminBannersPage() {
   const handleSave = async () => {
     if (!editing) return;
     const { id, created_at, ...data } = editing;
+    setUploading(true);
+    setUploadMsg("");
     if (fileRef.current?.files?.[0]) {
-      const file = fileRef.current.files[0];
-      const path = `banners/${Date.now()}.${file.name.split(".").pop()}`;
-      const { error } = await supabase.storage.from("noori-fashion").upload(path, file);
+      const original = fileRef.current.files[0];
+      setUploadMsg(`Compressing ${original.name}...`);
+      const { file, originalSize, compressedSize } = await compressImage(original);
+      const ext = file.name.split(".").pop() || "webp";
+      const path = `banners/${Date.now()}.${ext}`;
+      setUploadMsg(`Uploading (${formatBytes(originalSize)} → ${formatBytes(compressedSize)})...`);
+      const { error } = await supabase.storage.from("noori-fashion").upload(path, file, { contentType: file.type });
       if (!error) data.image = path;
+      setUploadMsg(`Compressed: ${formatBytes(originalSize)} → ${formatBytes(compressedSize)}`);
     }
-    if (!data.image) { alert("Banner image is required"); return; }
+    if (!data.image) { setUploading(false); alert("Banner image is required"); return; }
     if (id) { await supabase.from("nf_banners").update(data).eq("id", id); }
     else { await supabase.from("nf_banners").insert(data); }
     setEditing(null);
+    setUploading(false);
+    setUploadMsg("");
     if (fileRef.current) fileRef.current.value = "";
     fetch_();
   };
@@ -60,12 +72,17 @@ export default function AdminBannersPage() {
               <div><label className="text-xs font-medium block mb-1">Subtitle</label><input value={editing.subtitle || ""} onChange={(e) => setEditing({ ...editing, subtitle: e.target.value })} className="input-field" /></div>
               <div><label className="text-xs font-medium block mb-1">Link</label><input value={editing.link || ""} onChange={(e) => setEditing({ ...editing, link: e.target.value })} className="input-field" placeholder="/category/exclusive" /></div>
               <div><label className="text-xs font-medium block mb-1">Sort Order</label><input type="number" value={editing.sort_order} onChange={(e) => setEditing({ ...editing, sort_order: parseInt(e.target.value) || 0 })} className="input-field" /></div>
-              <div><label className="text-xs font-medium block mb-1">Image {!editing.id && "*"}</label><input ref={fileRef} type="file" accept="image/*" className="text-xs" /></div>
+              <div>
+                <label className="text-xs font-medium block mb-1">Image {!editing.id && "*"}</label>
+                <input ref={fileRef} type="file" accept="image/*" className="text-xs" disabled={uploading} />
+                <p className="text-[10px] text-dark-300 mt-1">Auto-compressed to WebP ~500 KB, max 1600px.</p>
+                {uploadMsg && <p className="text-[10px] text-dark-400 mt-1">{uploadMsg}</p>}
+              </div>
               <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={editing.is_active} onChange={(e) => setEditing({ ...editing, is_active: e.target.checked })} className="accent-brand" /> Active</label>
             </div>
             <div className="flex gap-3 mt-5">
-              <button onClick={handleSave} className="btn-primary text-sm py-2.5 flex-1">Save</button>
-              <button onClick={() => setEditing(null)} className="btn-outline text-sm py-2.5 flex-1">Cancel</button>
+              <button onClick={handleSave} disabled={uploading} className="btn-primary text-sm py-2.5 flex-1 disabled:opacity-50">{uploading ? "Saving..." : "Save"}</button>
+              <button onClick={() => setEditing(null)} disabled={uploading} className="btn-outline text-sm py-2.5 flex-1 disabled:opacity-50">Cancel</button>
             </div>
           </div>
         </div>
