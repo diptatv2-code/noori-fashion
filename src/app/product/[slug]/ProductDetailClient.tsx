@@ -8,6 +8,7 @@ import { getImageUrl } from '@/lib/supabase';
 import { useSettings } from '@/components/SettingsProvider';
 import ProductCard from '@/components/ProductCard';
 import WishlistButton from '@/components/WishlistButton';
+import Lightbox from '@/components/Lightbox';
 import type { Product } from '@/types';
 
 export default function ProductDetailClient({ product, related }: { product: Product; related: Product[] }) {
@@ -18,6 +19,7 @@ export default function ProductDetailClient({ product, related }: { product: Pro
   const settings = useSettings();
 
   const [selectedImage, setSelectedImage] = useState(0);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
   const [selectedSize, setSelectedSize] = useState('');
   const [qty, setQty] = useState(1);
   const [added, setAdded] = useState(false);
@@ -80,7 +82,12 @@ export default function ProductDetailClient({ product, related }: { product: Pro
         <div className="grid md:grid-cols-2 gap-8 lg:gap-12">
           {/* Gallery */}
           <div>
-            <div className="aspect-[3/4] relative bg-dark-50 overflow-hidden mb-3">
+            <button
+              type="button"
+              onClick={() => setLightboxOpen(true)}
+              aria-label="Open image viewer"
+              className="block w-full aspect-[3/4] relative bg-dark-50 overflow-hidden mb-3 cursor-zoom-in group"
+            >
               {galleryImages.map((img, idx) => (
                 <Image
                   key={img.id}
@@ -92,9 +99,14 @@ export default function ProductDetailClient({ product, related }: { product: Pro
                   priority={idx === 0}
                 />
               ))}
+              <span className="absolute bottom-3 right-3 bg-black/60 text-white p-2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m-3-3h6" />
+                </svg>
+              </span>
               {discount > 0 && <span className="badge-sale">-{discount}%</span>}
               {product.is_new && <span className="badge-new">New</span>}
-            </div>
+            </button>
             {images.length > 1 && (
               <div className="grid grid-cols-5 gap-2">
                 {images.map((img, idx) => (
@@ -194,7 +206,7 @@ export default function ProductDetailClient({ product, related }: { product: Pro
               </div>
               <div className="flex items-center gap-2 text-dark-500">
                 <svg className="w-4 h-4 text-brand shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg>
-                Cash on Delivery | bKash | Nagad
+                Cash on Delivery (Dhaka only) | bKash
               </div>
               <div className="flex items-center gap-2 text-dark-500">
                 <svg className="w-4 h-4 text-brand shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
@@ -203,6 +215,15 @@ export default function ProductDetailClient({ product, related }: { product: Pro
             </div>
           </div>
         </div>
+
+        {lightboxOpen && (
+          <Lightbox
+            images={galleryImages}
+            startIndex={selectedImage}
+            alt={product.name}
+            onClose={() => setLightboxOpen(false)}
+          />
+        )}
 
         {/* Related Products */}
         {related.length > 0 && (
