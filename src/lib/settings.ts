@@ -21,7 +21,7 @@ export interface SiteSettings {
 }
 
 const defaults: SiteSettings = {
-  site_name: 'নূরী ফ্যাশন',
+  site_name: 'NOORI FASHION',
   site_name_en: 'Noori Fashion',
   site_tagline: 'Premium Women\'s Fashion',
   shipping_dhaka: 80,

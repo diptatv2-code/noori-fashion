@@ -37,7 +37,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     .order('sort_order');
 
   return (
-    <html lang="bn">
+    <html lang="en">
       <body className="min-h-screen flex flex-col">
         <SettingsProvider settings={settings}>
           <AuthProvider />

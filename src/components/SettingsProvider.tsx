@@ -13,7 +13,7 @@ export function useSettings(): SiteSettings {
   if (!ctx) {
     // Fallback defaults if context missing
     return {
-      site_name: 'নূরী ফ্যাশন',
+      site_name: 'NOORI FASHION',
       site_name_en: 'Noori Fashion',
       site_tagline: 'Premium Women\'s Fashion',
       shipping_dhaka: 80,
