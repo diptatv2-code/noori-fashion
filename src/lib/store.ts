@@ -3,6 +3,33 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { CartItem, Product, ProductVariant } from '@/types';
 
+interface ToastItem {
+  id: number;
+  productId: string;
+  productName: string;
+  productImage: string | null;
+  quantity: number;
+  size?: string;
+}
+
+interface ToastStore {
+  items: ToastItem[];
+  push: (toast: Omit<ToastItem, 'id'>) => void;
+  dismiss: (id: number) => void;
+}
+
+export const useToastStore = create<ToastStore>((set) => ({
+  items: [],
+  push: (t) => set((s) => {
+    // Collapse rapid adds of the same product/size into one toast: replace the
+    // previous entry rather than stacking up when a user clicks fast.
+    const key = `${t.productId}-${t.size || ''}`;
+    const filtered = s.items.filter((i) => `${i.productId}-${i.size || ''}` !== key);
+    return { items: [...filtered, { ...t, id: Date.now() + Math.random() }] };
+  }),
+  dismiss: (id) => set((s) => ({ items: s.items.filter((i) => i.id !== id) })),
+}));
+
 interface CartStore {
   items: CartItem[];
   isCartOpen: boolean;
@@ -39,6 +66,13 @@ export const useCartStore = create<CartStore>()(
           return {
             items: [...state.items, { product, variant, quantity, selectedSize: size, selectedColor: color }],
           };
+        });
+        useToastStore.getState().push({
+          productId: product.id,
+          productName: product.name,
+          productImage: product.nf_product_images?.[0]?.url || null,
+          quantity,
+          size,
         });
       },
       removeItem: (productId, size) => {

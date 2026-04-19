@@ -7,6 +7,7 @@ import CartDrawer from '@/components/CartDrawer';
 import WhatsAppButton from '@/components/WhatsAppButton';
 import SearchModal from '@/components/SearchModal';
 import AuthProvider from '@/components/AuthProvider';
+import Toaster from '@/components/Toaster';
 import { SettingsProvider } from '@/components/SettingsProvider';
 import { getSettings } from '@/lib/settings';
 import { createClient } from '@supabase/supabase-js';
@@ -77,6 +78,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           <CartDrawer />
           <SearchModal />
           <WhatsAppButton />
+          <Toaster />
         </SettingsProvider>
       </body>
     </html>
