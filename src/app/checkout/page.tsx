@@ -5,7 +5,7 @@ import { useCartStore, useAuthStore } from '@/lib/store';
 import { formatPrice } from '@/lib/utils';
 import { useSettings } from '@/components/SettingsProvider';
 
-type PaymentMethod = 'cod' | 'bkash' | 'nagad' | 'bkash_50_advance' | 'bkash_100_advance';
+type PaymentMethod = 'cod' | 'bkash' | 'bkash_50_advance' | 'bkash_100_advance';
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -24,9 +24,18 @@ export default function CheckoutPage() {
   const shipping = subtotal >= settings.free_shipping_min ? 0 : form.city === 'Dhaka' ? settings.shipping_dhaka : settings.shipping_outside;
   const total = subtotal + shipping;
 
-  const needsTxn = ['bkash', 'nagad', 'bkash_50_advance', 'bkash_100_advance'].includes(form.payment);
+  const needsTxn = ['bkash', 'bkash_50_advance', 'bkash_100_advance'].includes(form.payment);
   const advanceAmount = form.payment === 'bkash_50_advance' ? Math.ceil(total * 0.5) : form.payment === 'bkash_100_advance' ? total : 0;
-  const paymentNumber = form.payment.startsWith('bkash') ? settings.bkash_number : settings.nagad_number;
+  const paymentNumber = settings.bkash_number;
+
+  const isDhaka = form.city === 'Dhaka';
+  const allowedPayments: PaymentMethod[] = isDhaka ? ['cod', 'bkash'] : ['bkash_50_advance', 'bkash_100_advance'];
+
+  useEffect(() => {
+    if (!allowedPayments.includes(form.payment)) {
+      setForm((f) => ({ ...f, payment: allowedPayments[0], txnId: '' }));
+    }
+  }, [form.city]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -100,13 +109,13 @@ export default function CheckoutPage() {
     );
   }
 
-  const paymentOptions: { value: PaymentMethod; label: string; desc: string }[] = [
-    { value: 'cod', label: 'Cash on Delivery', desc: 'Pay when you receive the product' },
-    { value: 'bkash', label: 'bKash', desc: `bKash number: ${settings.bkash_number}` },
-    { value: 'nagad', label: 'Nagad', desc: `Nagad number: ${settings.nagad_number}` },
-    { value: 'bkash_50_advance', label: 'bKash (50% Advance)', desc: `Send 50% in advance to confirm order — bKash: ${settings.bkash_number}` },
-    { value: 'bkash_100_advance', label: 'bKash (100% Advance)', desc: `Send full amount in advance — bKash: ${settings.bkash_number}` },
-  ];
+  const allPaymentOptions: Record<PaymentMethod, { label: string; desc: string }> = {
+    cod: { label: 'Cash on Delivery', desc: 'Pay when you receive the product' },
+    bkash: { label: 'bKash', desc: `bKash number: ${settings.bkash_number}` },
+    bkash_50_advance: { label: 'bKash (50% Advance)', desc: `Send 50% in advance to confirm order — bKash: ${settings.bkash_number}` },
+    bkash_100_advance: { label: 'bKash (100% Advance)', desc: `Send full amount in advance — bKash: ${settings.bkash_number}` },
+  };
+  const paymentOptions = allowedPayments.map((v) => ({ value: v, ...allPaymentOptions[v] }));
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">

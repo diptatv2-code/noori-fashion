@@ -38,6 +38,20 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Please enter a valid mobile number' }, { status: 400 });
     }
 
+    // Enforce payment-method rules by city (Bug 1)
+    const paymentMethod = String(orderData.payment_method || '');
+    const isDhakaCity = shippingCity === 'Dhaka' || shippingCity === 'ঢাকা';
+    const allowed = isDhakaCity
+      ? ['cod', 'bkash']
+      : ['bkash_50_advance', 'bkash_100_advance'];
+    if (!allowed.includes(paymentMethod)) {
+      return NextResponse.json({
+        error: isDhakaCity
+          ? 'For Dhaka, only Cash on Delivery or bKash is allowed.'
+          : 'For outside Dhaka, only bKash 50% or 100% advance is allowed.',
+      }, { status: 400 });
+    }
+
     // Fetch settings for shipping calculation
     const { data: settingsRows } = await supabase.from('nf_settings').select('key, value');
     const settings: Record<string, string> = {};
