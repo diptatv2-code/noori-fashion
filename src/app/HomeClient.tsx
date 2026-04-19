@@ -129,9 +129,9 @@ export default function HomeClient({ categories, featured, newArrivals, banners 
       </section>
 
       {/* Category Icons */}
-      <section className="max-w-5xl mx-auto px-4 py-8 md:py-12">
+      <section className="max-w-5xl mx-auto px-4 pt-8 pb-2 md:pt-10 md:pb-2">
         <h2 className="section-title">Our Collection</h2>
-        <p className="text-center text-dark-400 text-sm mb-6">Browse our finest categories</p>
+        <p className="text-center text-dark-400 text-sm mb-4">Browse our finest categories</p>
         <div className="flex justify-center gap-6 md:gap-8 overflow-x-auto pb-2">
           {categories.map((cat, idx) => {
             const bgImages = ['/banner-1.jpg', '/banner-2.jpg', '/banner-3.jpg', '/banner-1.jpg', '/banner-2.jpg'];
@@ -142,13 +142,13 @@ export default function HomeClient({ categories, featured, newArrivals, banners 
                 className="group flex flex-col items-center shrink-0 animate-fade-in"
                 style={{ animationDelay: `${idx * 0.1}s` }}
               >
-                <div className="relative w-[90px] h-[90px] md:w-[130px] md:h-[130px] rounded-full overflow-hidden border border-dark-100 group-hover:shadow-lg group-hover:scale-105 transition-all duration-300">
+                <div className="relative w-[110px] h-[110px] md:w-[160px] md:h-[160px] rounded-full overflow-hidden border border-dark-100 group-hover:shadow-lg group-hover:scale-105 transition-all duration-300">
                   <Image
                     src={cat.image ? getImageUrl(cat.image) : bgImages[idx % bgImages.length]}
                     alt={cat.name}
                     fill
                     className="object-cover"
-                    sizes="130px"
+                    sizes="160px"
                   />
                 </div>
                 <span className="mt-3 text-xs md:text-sm font-medium text-dark-600 group-hover:text-brand transition-colors text-center">
@@ -162,7 +162,7 @@ export default function HomeClient({ categories, featured, newArrivals, banners 
 
       {/* Featured Products */}
       {featured.length > 0 && (
-        <section className="max-w-7xl mx-auto px-4 py-6 md:py-10">
+        <section className="max-w-7xl mx-auto px-4 pt-2 pb-6 md:pt-2 md:pb-10">
           <div className="flex items-center justify-between mb-6">
             <div>
               <h2 className="font-display text-2xl md:text-3xl font-semibold">Featured Collection</h2>
