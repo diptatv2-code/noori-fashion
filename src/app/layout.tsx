@@ -59,6 +59,15 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 
   return (
     <html lang="en">
+      <head>
+        {/* Start TLS handshake to the self-hosted Supabase as soon as the HTML
+            starts parsing. The TLS negotiation to api.diptait.com.bd costs
+            ~500ms; this moves that cost off the critical query path so the
+            first Supabase call (profile, wishlist, dashboard counts) doesn't
+            have to wait for the handshake. */}
+        <link rel="preconnect" href={SUPABASE_URL} crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href={SUPABASE_URL} />
+      </head>
       <body className="min-h-screen flex flex-col">
         <SettingsProvider settings={settings}>
           <AuthProvider />

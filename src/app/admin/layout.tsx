@@ -43,7 +43,16 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     return () => { cancelled = true; };
   }, [user, router]);
 
-  if (checking) return <div className="flex items-center justify-center min-h-screen"><p className="text-dark-400">Loading...</p></div>;
+  if (checking) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="space-y-3 text-center">
+          <div className="w-8 h-8 border-2 border-brand border-t-transparent rounded-full animate-spin mx-auto" />
+          <p className="text-dark-400 text-sm">Loading admin...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-[calc(100vh-80px)]">
