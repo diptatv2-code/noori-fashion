@@ -22,15 +22,26 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
-    const check = async () => {
+    // Fast path: AuthProvider already populated the auth store.
+    if (user) {
+      if (user.role === 'admin') setChecking(false);
+      else router.push('/');
+      return;
+    }
+
+    // Slow path: cover hard refresh on /admin before AuthProvider finishes.
+    let cancelled = false;
+    (async () => {
       const { data: { session } } = await supabase.auth.getSession();
+      if (cancelled) return;
       if (!session) { router.push('/login'); return; }
       const { data: profile } = await supabase.from('nf_profiles').select('role').eq('id', session.user.id).single();
+      if (cancelled) return;
       if (profile?.role !== 'admin') { router.push('/'); return; }
       setChecking(false);
-    };
-    check();
-  }, [router]);
+    })();
+    return () => { cancelled = true; };
+  }, [user, router]);
 
   if (checking) return <div className="flex items-center justify-center min-h-screen"><p className="text-dark-400">লোড হচ্ছে...</p></div>;
 
