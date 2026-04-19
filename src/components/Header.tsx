@@ -28,7 +28,7 @@ export default function Header({ categories }: { categories: Category[] }) {
   return (
     <>
       {/* Top Bar */}
-      <div className="bg-dark-600 text-white text-xs py-2 hidden md:block">
+      <div className="bg-black text-white text-xs py-2 hidden md:block">
         <div className="max-w-7xl mx-auto px-4 flex justify-between items-center">
           <p>{shippingText}</p>
           <div className="flex items-center gap-4">
@@ -42,11 +42,11 @@ export default function Header({ categories }: { categories: Category[] }) {
       </div>
 
       {/* Main Header */}
-      <header className={`sticky top-0 z-50 bg-white transition-shadow duration-300 ${scrolled ? 'shadow-md' : 'shadow-sm'}`}>
+      <header className={`sticky top-0 z-50 bg-black text-white transition-shadow duration-300 ${scrolled ? 'shadow-md shadow-black/40' : 'shadow-sm shadow-black/20'}`}>
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex items-center justify-between h-16 md:h-20">
             {/* Mobile Menu */}
-            <button onClick={toggleMenu} className="md:hidden p-2 -ml-2 text-dark-800" aria-label="Menu">
+            <button onClick={toggleMenu} className="md:hidden p-2 -ml-2 text-white" aria-label="Menu">
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 {isMenuOpen ? (
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -63,19 +63,19 @@ export default function Header({ categories }: { categories: Category[] }) {
                 alt="Noori Fashion"
                 width={80}
                 height={80}
-                className="h-14 w-14 md:h-20 md:w-20 rounded-full object-cover border border-dark-100"
+                className="h-14 w-14 md:h-20 md:w-20 rounded-full object-cover border border-white/20"
                 priority
               />
             </Link>
 
             {/* Desktop Nav */}
             <nav className="hidden md:flex items-center gap-1">
-              <Link href="/" className="px-3 py-2 text-sm font-medium text-dark-600 hover:text-brand transition-colors">Home</Link>
+              <Link href="/" className="px-3 py-2 text-sm font-medium text-white hover:text-brand transition-colors">Home</Link>
               {categories.map((cat) => (
                 <Link
                   key={cat.id}
                   href={`/category/${cat.slug}`}
-                  className="px-3 py-2 text-sm font-medium text-dark-600 hover:text-brand transition-colors"
+                  className="px-3 py-2 text-sm font-medium text-white hover:text-brand transition-colors"
                 >
                   {cat.name}
                 </Link>
@@ -83,7 +83,7 @@ export default function Header({ categories }: { categories: Category[] }) {
             </nav>
 
             {/* Actions */}
-            <div className="flex items-center gap-2 md:gap-3 text-dark-600">
+            <div className="flex items-center gap-2 md:gap-3 text-white">
               <button onClick={toggleSearch} className="p-2 hover:text-brand transition-colors" aria-label="Search">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
               </button>
@@ -115,34 +115,34 @@ export default function Header({ categories }: { categories: Category[] }) {
       {isMenuOpen && (
         <div className="fixed inset-0 z-[60] md:hidden">
           <div className="absolute inset-0 bg-black/50" onClick={toggleMenu} />
-          <div className="absolute left-0 top-0 h-full w-72 bg-white animate-slide-in-right shadow-xl">
-            <div className="p-4 border-b flex items-center justify-between">
-              <span className="font-display text-lg font-bold text-dark-600">Noori <span className="text-brand">Fashion</span></span>
-              <button onClick={toggleMenu} className="p-1">
+          <div className="absolute left-0 top-0 h-full w-72 bg-black text-white animate-slide-in-right shadow-xl">
+            <div className="p-4 border-b border-white/10 flex items-center justify-between">
+              <span className="font-display text-lg font-bold text-white">Noori <span className="text-brand">Fashion</span></span>
+              <button onClick={toggleMenu} className="p-1 text-white">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
               </button>
             </div>
             <nav className="py-2">
-              <Link href="/" onClick={toggleMenu} className="block px-4 py-3 text-sm font-medium hover:bg-brand-50 hover:text-brand transition-colors border-b border-dark-50">Home</Link>
+              <Link href="/" onClick={toggleMenu} className="block px-4 py-3 text-sm font-medium text-white hover:text-brand transition-colors border-b border-white/10">Home</Link>
               {categories.map((cat) => (
                 <Link
                   key={cat.id}
                   href={`/category/${cat.slug}`}
                   onClick={toggleMenu}
-                  className="block px-4 py-3 text-sm font-medium hover:bg-brand-50 hover:text-brand transition-colors border-b border-dark-50"
+                  className="block px-4 py-3 text-sm font-medium text-white hover:text-brand transition-colors border-b border-white/10"
                 >
                   {cat.name}
                 </Link>
               ))}
-              <Link href="/track-order" onClick={toggleMenu} className="block px-4 py-3 text-sm font-medium hover:bg-brand-50 hover:text-brand transition-colors border-b border-dark-50">
+              <Link href="/track-order" onClick={toggleMenu} className="block px-4 py-3 text-sm font-medium text-white hover:text-brand transition-colors border-b border-white/10">
                 Track Order
               </Link>
               {user ? (
-                <Link href="/account" onClick={toggleMenu} className="block px-4 py-3 text-sm font-medium hover:bg-brand-50 hover:text-brand transition-colors">
+                <Link href="/account" onClick={toggleMenu} className="block px-4 py-3 text-sm font-medium text-white hover:text-brand transition-colors">
                   My Account
                 </Link>
               ) : (
-                <Link href="/login" onClick={toggleMenu} className="block px-4 py-3 text-sm font-medium hover:bg-brand-50 hover:text-brand transition-colors">
+                <Link href="/login" onClick={toggleMenu} className="block px-4 py-3 text-sm font-medium text-white hover:text-brand transition-colors">
                   Login / Register
                 </Link>
               )}

@@ -6,14 +6,14 @@ const config: Config = {
     extend: {
       colors: {
         brand: {
-          DEFAULT: '#E85D24',
-          light: '#FF7A45',
-          dark: '#C94D1C',
-          50: '#FFF3ED',
-          100: '#FFE0D1',
-          500: '#E85D24',
-          600: '#C94D1C',
-          700: '#A93D15',
+          DEFAULT: '#D12362',
+          light: '#E5558A',
+          dark: '#A81A4E',
+          50: '#FCE7EE',
+          100: '#F8C5D4',
+          500: '#D12362',
+          600: '#A81A4E',
+          700: '#7F133B',
         },
         dark: {
           DEFAULT: '#1A1A1A',

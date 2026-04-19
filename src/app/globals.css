@@ -5,9 +5,9 @@
 @tailwind utilities;
 
 :root {
-  --brand: #E85D24;
-  --brand-light: #FF7A45;
-  --brand-dark: #C94D1C;
+  --brand: #D12362;
+  --brand-light: #E5558A;
+  --brand-dark: #A81A4E;
 }
 
 * { box-sizing: border-box; }

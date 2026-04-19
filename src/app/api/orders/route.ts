@@ -223,7 +223,7 @@ async function sendEmail(order: any, items: any[], ownerEmail: string) {
   const html = `
     <div style="max-width:600px;margin:0 auto;font-family:sans-serif">
       <div style="background:#1A1A1A;padding:20px;text-align:center">
-        <h1 style="color:#E85D24;margin:0;font-size:24px">Noori Fashion</h1>
+        <h1 style="color:#D12362;margin:0;font-size:24px">Noori Fashion</h1>
       </div>
       <div style="padding:24px;background:#fff">
         <h2 style="color:#333;margin:0 0 16px">Order Confirmation</h2>
@@ -235,7 +235,7 @@ async function sendEmail(order: any, items: any[], ownerEmail: string) {
           <tfoot>
             <tr><td colspan="2" style="padding:8px;text-align:right">Subtotal</td><td style="padding:8px;text-align:right">৳${order.subtotal}</td></tr>
             <tr><td colspan="2" style="padding:8px;text-align:right">Shipping</td><td style="padding:8px;text-align:right">৳${order.shipping_cost}</td></tr>
-            <tr style="font-weight:bold"><td colspan="2" style="padding:8px;text-align:right;border-top:2px solid #E85D24">Total</td><td style="padding:8px;text-align:right;border-top:2px solid #E85D24;color:#E85D24">৳${order.total}</td></tr>
+            <tr style="font-weight:bold"><td colspan="2" style="padding:8px;text-align:right;border-top:2px solid #D12362">Total</td><td style="padding:8px;text-align:right;border-top:2px solid #D12362;color:#D12362">৳${order.total}</td></tr>
           </tfoot>
         </table>
         <p style="color:#666;font-size:14px">Thank you for shopping with Noori Fashion!</p>

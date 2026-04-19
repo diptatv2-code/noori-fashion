@@ -8,7 +8,7 @@ export default function Footer() {
   const whatsappNumber = settings.whatsapp.replace(/[^0-9]/g, '');
 
   return (
-    <footer className="bg-dark-600 text-white mt-16">
+    <footer className="bg-black text-white mt-16">
       <div className="max-w-7xl mx-auto px-4 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Brand */}
