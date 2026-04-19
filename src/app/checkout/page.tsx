@@ -111,9 +111,9 @@ export default function CheckoutPage() {
 
   const allPaymentOptions: Record<PaymentMethod, { label: string; desc: string }> = {
     cod: { label: 'Cash on Delivery', desc: 'Pay when you receive the product' },
-    bkash: { label: 'bKash', desc: `bKash number: ${settings.bkash_number}` },
-    bkash_50_advance: { label: 'bKash (50% Advance)', desc: `Send 50% in advance to confirm order — bKash: ${settings.bkash_number}` },
-    bkash_100_advance: { label: 'bKash (100% Advance)', desc: `Send full amount in advance — bKash: ${settings.bkash_number}` },
+    bkash: { label: 'bKash (Make Payment)', desc: `Use bKash app → Make Payment to merchant ${settings.bkash_number}` },
+    bkash_50_advance: { label: 'bKash (50% Advance)', desc: `Make Payment of 50% in advance to confirm order — bKash Merchant: ${settings.bkash_number}` },
+    bkash_100_advance: { label: 'bKash (100% Advance)', desc: `Make Payment of full amount in advance — bKash Merchant: ${settings.bkash_number}` },
   };
   const paymentOptions = allowedPayments.map((v) => ({ value: v, ...allPaymentOptions[v] }));
 
@@ -180,11 +180,17 @@ export default function CheckoutPage() {
                 ))}
               </div>
               {needsTxn && (
-                <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200">
-                  <p className="text-xs text-yellow-800 mb-2">
-                    Send {advanceAmount > 0 ? formatPrice(advanceAmount) : formatPrice(total)} to {paymentNumber} and enter the transaction ID below.
+                <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 space-y-2">
+                  <p className="text-xs text-yellow-800 font-medium">
+                    bKash → <span className="font-bold">Make Payment</span> (not Send Money)
                   </p>
-                  <input name="txnId" value={form.txnId} onChange={handleChange} className="input-field text-sm" placeholder="Transaction ID" required />
+                  <ol className="text-xs text-yellow-800 list-decimal list-inside space-y-0.5">
+                    <li>Open bKash app → tap <strong>Make Payment</strong></li>
+                    <li>Merchant number: <strong>{paymentNumber}</strong></li>
+                    <li>Amount: <strong>{formatPrice(advanceAmount > 0 ? advanceAmount : total)}</strong></li>
+                    <li>After payment, enter the Transaction ID below</li>
+                  </ol>
+                  <input name="txnId" value={form.txnId} onChange={handleChange} className="input-field text-sm" placeholder="Transaction ID (TrxID)" required />
                 </div>
               )}
             </div>

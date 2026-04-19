@@ -33,7 +33,7 @@ const defaults: SiteSettings = {
   email: 'Noori330332@gmail.com',
   phone: '+8801718389159',
   address: 'Police Plaza Concord, Gulshan-1, Level 2, Shop 369-370, Dhaka',
-  bkash_number: '01701019541',
+  bkash_number: '01955945219',
   nagad_number: '01515653291',
   currency: '৳',
   making_charge: 500,
