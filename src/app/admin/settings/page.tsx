@@ -9,43 +9,39 @@ interface Setting {
 }
 
 const LABELS: Record<string, string> = {
-  phone: 'ফোন নম্বর',
-  email: 'ইমেইল',
-  whatsapp: 'হোয়াটসঅ্যাপ',
-  facebook: 'ফেসবুক লিংক',
-  instagram: 'ইনস্টাগ্রাম লিংক',
-  address: 'ঠিকানা',
-  shipping_dhaka: 'ঢাকায় শিপিং চার্জ (৳)',
-  shipping_outside: 'ঢাকার বাইরে শিপিং চার্জ (৳)',
-  free_shipping_min: 'ফ্রি শিপিং মিনিমাম (৳)',
-  bkash_number: 'বিকাশ নম্বর',
-  nagad_number: 'নগদ নম্বর',
-  site_name: 'সাইটের নাম (বাংলা)',
-  site_name_en: 'সাইটের নাম (English)',
-  site_tagline: 'ট্যাগলাইন',
-  currency: 'কারেন্সি',
-  making_charge: 'মেকিং চার্জ (৳)',
+  phone: 'Phone Number',
+  email: 'Email',
+  whatsapp: 'WhatsApp',
+  facebook: 'Facebook Link',
+  instagram: 'Instagram Link',
+  address: 'Address',
+  shipping_dhaka: 'Dhaka Shipping (৳)',
+  shipping_outside: 'Outside Dhaka Shipping (৳)',
+  free_shipping_min: 'Free Shipping Minimum (৳)',
+  bkash_number: 'bKash Number',
+  nagad_number: 'Nagad Number',
+  site_name: 'Site Name (Bangla)',
+  site_name_en: 'Site Name (English)',
+  site_tagline: 'Tagline',
+  currency: 'Currency',
+  making_charge: 'Making Charge (৳)',
 };
 
 const CATEGORIES = [
   {
-    title: 'যোগাযোগ',
-    subtitle: 'Contact',
+    title: 'Contact',
     keys: ['phone', 'email', 'whatsapp', 'facebook', 'instagram', 'address'],
   },
   {
-    title: 'শিপিং',
-    subtitle: 'Shipping',
+    title: 'Shipping',
     keys: ['shipping_dhaka', 'shipping_outside', 'free_shipping_min'],
   },
   {
-    title: 'পেমেন্ট',
-    subtitle: 'Payment',
+    title: 'Payment',
     keys: ['bkash_number', 'nagad_number'],
   },
   {
-    title: 'সাইট',
-    subtitle: 'Site',
+    title: 'Site',
     keys: ['site_name', 'site_name_en', 'site_tagline', 'currency', 'making_charge'],
   },
 ];
@@ -111,7 +107,7 @@ export default function AdminSettingsPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <p className="text-dark-400">লোড হচ্ছে...</p>
+        <p className="text-dark-400">Loading...</p>
       </div>
     );
   }
@@ -119,19 +115,19 @@ export default function AdminSettingsPage() {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="font-display text-2xl font-semibold">সেটিংস</h1>
+        <h1 className="font-display text-2xl font-semibold">Settings</h1>
         <button
           onClick={handleSave}
           disabled={saving || !hasChanges()}
           className="btn-primary text-sm py-2 px-6 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {saving ? 'সেভ হচ্ছে...' : 'সেভ করুন'}
+          {saving ? 'Saving...' : 'Save'}
         </button>
       </div>
 
       {success && (
         <div className="mb-6 p-3 bg-green-50 border border-green-200 text-green-700 text-sm">
-          সেটিংস সফলভাবে সেভ হয়েছে!
+          Settings saved successfully!
         </div>
       )}
 
@@ -139,9 +135,7 @@ export default function AdminSettingsPage() {
         {CATEGORIES.map((cat) => (
           <div key={cat.title} className="border border-dark-100 bg-white">
             <div className="px-5 py-3 border-b border-dark-100 bg-dark-50/50">
-              <h2 className="font-display font-semibold text-sm">
-                {cat.title} <span className="text-dark-400 font-normal">({cat.subtitle})</span>
-              </h2>
+              <h2 className="font-display font-semibold text-sm">{cat.title}</h2>
             </div>
             <div className="p-5 grid md:grid-cols-2 gap-4">
               {cat.keys.map((key) => (
@@ -182,7 +176,7 @@ export default function AdminSettingsPage() {
           disabled={saving || !hasChanges()}
           className="btn-primary text-sm py-2.5 px-8 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {saving ? 'সেভ হচ্ছে...' : 'সেভ করুন'}
+          {saving ? 'Saving...' : 'Save'}
         </button>
       </div>
     </div>

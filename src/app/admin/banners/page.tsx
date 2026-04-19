@@ -75,7 +75,7 @@ export default function AdminBannersPage() {
               <div>
                 <label className="text-xs font-medium block mb-1">Image {!editing.id && "*"}</label>
                 <input ref={fileRef} type="file" accept="image/*" className="text-xs" disabled={uploading} />
-                <p className="text-[10px] text-dark-300 mt-1">Auto-compressed to WebP ~500 KB, max 1600px.</p>
+                <p className="text-[10px] text-dark-300 mt-1">Auto-compressed to WebP (~1.5 MB, max 2400px).</p>
                 {uploadMsg && <p className="text-[10px] text-dark-400 mt-1">{uploadMsg}</p>}
               </div>
               <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={editing.is_active} onChange={(e) => setEditing({ ...editing, is_active: e.target.checked })} className="accent-brand" /> Active</label>
