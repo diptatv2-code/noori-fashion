@@ -1,4 +1,5 @@
 'use client';
+import { useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useCartStore, useUIStore } from '@/lib/store';
@@ -6,6 +7,19 @@ import { formatPrice, getDiscount } from '@/lib/utils';
 import { getImageUrl } from '@/lib/supabase';
 import WishlistButton from '@/components/WishlistButton';
 import type { Product } from '@/types';
+
+// Warm the Vercel image optimizer cache for the sizes the product detail
+// page will request so that click → navigation → first paint is not gated
+// on a cold optimizer miss (~350ms per image).
+const MAIN_IMAGE_WIDTHS = [640, 1080] as const;
+function preloadMainImage(url: string) {
+  if (typeof window === 'undefined') return;
+  const base = getImageUrl(url);
+  for (const w of MAIN_IMAGE_WIDTHS) {
+    const img = new window.Image();
+    img.src = `/_next/image?url=${encodeURIComponent(base)}&w=${w}&q=75`;
+  }
+}
 
 function getImg(product: Product): string {
   const imgs = product.nf_product_images;
@@ -25,8 +39,18 @@ export default function ProductCard({ product }: { product: Product }) {
   const discount = getDiscount(product.price, product.compare_price);
   const secondImg = getSecondImg(product);
 
+  const warmImages = useCallback(() => {
+    const imgs = product.nf_product_images;
+    if (!imgs || imgs.length === 0) return;
+    preloadMainImage(imgs[0].url);
+  }, [product]);
+
   return (
-    <div className="group relative animate-fade-in">
+    <div
+      className="group relative animate-fade-in"
+      onMouseEnter={warmImages}
+      onTouchStart={warmImages}
+    >
       {/* Badges */}
       {product.is_new && <span className="badge-new">New</span>}
       {discount > 0 && <span className="badge-sale">-{discount}%</span>}
@@ -35,7 +59,11 @@ export default function ProductCard({ product }: { product: Product }) {
       <WishlistButton productId={product.id} className="absolute top-2 right-2 z-10" />
 
       {/* Image */}
-      <Link href={`/product/${product.slug}`} className="block relative aspect-[3/4] bg-dark-50 overflow-hidden mb-3">
+      <Link
+        href={`/product/${product.slug}`}
+        onFocus={warmImages}
+        className="block relative aspect-[3/4] bg-dark-50 overflow-hidden mb-3"
+      >
         <Image
           src={getImg(product)}
           alt={product.name}

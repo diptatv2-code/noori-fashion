@@ -176,8 +176,17 @@ export async function POST(req: NextRequest) {
 
 async function sendTelegram(order: any, items: any[]) {
   const token = process.env.TELEGRAM_BOT_TOKEN;
-  const chatId = process.env.TELEGRAM_CHAT_ID;
-  if (!token || !chatId) return;
+  const raw = process.env.TELEGRAM_CHAT_ID;
+  if (!token || !raw) return;
+
+  // Accept a comma-separated list so the bot can fan-out to the owner's
+  // personal chat + any group chats it has been invited to. Group chat IDs
+  // are negative (e.g. -1001234567890 for supergroups/channels).
+  const chatIds = raw
+    .split(',')
+    .map((s) => s.trim())
+    .filter((s) => s.length > 0);
+  if (chatIds.length === 0) return;
 
   const paymentLabels: Record<string, string> = {
     cod: 'Cash on Delivery', bkash: 'bKash', nagad: 'Nagad',
@@ -205,11 +214,19 @@ ${itemsList}
 ${order.transaction_id ? `🔑 TxnID: ${order.transaction_id}` : ''}
 ${order.notes ? `📝 Notes: ${order.notes}` : ''}`;
 
-  await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ chat_id: chatId, text: msg, parse_mode: 'Markdown' }),
-  });
+  // Send to every configured chat in parallel, but don't let one failure
+  // (e.g. bot kicked from a group) block the others.
+  await Promise.all(
+    chatIds.map((chat_id) =>
+      fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ chat_id, text: msg, parse_mode: 'Markdown' }),
+      }).catch((e) => {
+        console.error(`Telegram send to ${chat_id} failed:`, e);
+      })
+    )
+  );
 }
 
 async function sendEmail(order: any, items: any[], ownerEmail: string) {
