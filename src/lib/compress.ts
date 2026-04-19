@@ -1,9 +1,9 @@
 'use client';
 import imageCompression from 'browser-image-compression';
 
-const TARGET_MB = 0.5;
-const MAX_DIMENSION = 1600;
-const QUALITY = 0.85;
+const TARGET_MB = 1.5;
+const MAX_DIMENSION = 2400;
+const QUALITY = 0.9;
 
 export function formatBytes(bytes: number): string {
   if (bytes >= 1024 * 1024) return (bytes / (1024 * 1024)).toFixed(2) + ' MB';

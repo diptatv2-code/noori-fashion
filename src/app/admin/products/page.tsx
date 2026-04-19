@@ -289,6 +289,7 @@ export default function AdminProductsPage() {
                 <td className="p-3 hidden md:table-cell text-dark-400">{p.sold_count || 0}</td>
                 <td className="p-3">
                   <div className="flex gap-2">
+                    <a href={`/product/${p.slug}`} target="_blank" rel="noopener noreferrer" className="text-brand text-xs hover:underline">দেখুন</a>
                     <button onClick={() => setEditing({ ...p })} className="text-blue-600 text-xs hover:underline">সম্পাদনা</button>
                     <button onClick={() => handleDelete(p.id)} className="text-red-500 text-xs hover:underline">ডিলিট</button>
                   </div>
@@ -408,7 +409,7 @@ export default function AdminProductsPage() {
               {uploadMsg && <p className="text-[10px] text-dark-400 mt-1">{uploadMsg}</p>}
               <p className="text-[10px] text-dark-300 mt-1">
                 {editing.id
-                  ? 'ছবি স্বয়ংক্রিয়ভাবে WebP-তে কম্প্রেস হবে (~৫০০ KB, সর্বোচ্চ ১৬০০px)।'
+                  ? 'ছবি স্বয়ংক্রিয়ভাবে WebP-তে কম্প্রেস হবে (~১.৫ MB, সর্বোচ্চ ২৪০০px)।'
                   : 'ছবি সিলেক্ট করুন — প্রোডাক্ট সেভ করলে একসাথে কম্প্রেস ও আপলোড হবে।'}
               </p>
             </div>
@@ -525,10 +526,20 @@ export default function AdminProductsPage() {
               </div>
             )}
 
-            <div className="flex gap-3 mt-6">
+            <div className="flex gap-3 mt-6 flex-wrap">
               <button onClick={handleSave} disabled={saving} className="btn-primary text-sm py-2.5 flex-1 disabled:opacity-50">
                 {saving ? 'সেভ হচ্ছে...' : editing.id ? 'আপডেট করুন' : 'সেভ করুন'}
               </button>
+              {editing.id && editing.slug && (
+                <a
+                  href={`/product/${editing.slug}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn-outline text-sm py-2.5 flex-1 text-center"
+                >
+                  সাইটে দেখুন
+                </a>
+              )}
               <button onClick={() => setEditing(null)} className="btn-outline text-sm py-2.5 flex-1">বাতিল</button>
             </div>
           </div>
