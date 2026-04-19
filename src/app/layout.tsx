@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { unstable_cache } from 'next/cache';
 import './globals.css';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
@@ -12,6 +13,30 @@ import { createClient } from '@supabase/supabase-js';
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from '@/lib/supabase';
 
 export const revalidate = 60;
+
+// Settings + nav categories rarely change but block every render, including
+// admin pages that don't even display them. Cache both at the data layer for
+// 5 minutes so each request reuses the last result instead of round-tripping
+// to the self-hosted Supabase.
+const getCachedSettings = unstable_cache(
+  async () => getSettings(),
+  ['root_settings_v1'],
+  { revalidate: 300 }
+);
+
+const getCachedNavCategories = unstable_cache(
+  async () => {
+    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const { data } = await supabase
+      .from('nf_categories')
+      .select('*')
+      .eq('is_active', true)
+      .order('sort_order');
+    return data || [];
+  },
+  ['root_nav_categories_v1'],
+  { revalidate: 300 }
+);
 
 export const metadata: Metadata = {
   title: 'Noori Fashion - Premium Women\'s Fashion',
@@ -27,21 +52,17 @@ export const metadata: Metadata = {
 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const settings = await getSettings();
-
-  const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-  const { data: categories } = await supabase
-    .from('nf_categories')
-    .select('*')
-    .eq('is_active', true)
-    .order('sort_order');
+  const [settings, categories] = await Promise.all([
+    getCachedSettings(),
+    getCachedNavCategories(),
+  ]);
 
   return (
     <html lang="en">
       <body className="min-h-screen flex flex-col">
         <SettingsProvider settings={settings}>
           <AuthProvider />
-          <Header categories={categories || []} />
+          <Header categories={categories} />
           <main className="flex-1">{children}</main>
           <Footer />
           <CartDrawer />
